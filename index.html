@@ -12,11 +12,12 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:"PingFang SC","Mi
 .wrap{max-width:440px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .bar h1{font-size:17px;margin:0;font-weight:700}
-.bar p{font-size:12px;color:var(--muted);margin:2px 0 0}
-.lang{display:flex;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:3px;flex-shrink:0}
-.lang button{border:0;background:transparent;color:var(--fg);font:inherit;font-size:14px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer}
-.lang button[aria-pressed="true"]{background:var(--on);color:var(--onfg)}
-.lang button:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
+.seg{display:flex;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:3px;flex-shrink:0}
+.seg button{border:0;background:transparent;color:var(--fg);font:inherit;font-size:14px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--on);color:var(--onfg)}
+.seg button:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
+.screens{width:100%}
+.screens button{flex:1}
 img{display:block;width:100%;height:auto;border-radius:22px;border:1px solid var(--line)}
 footer{font-size:12px;color:var(--muted);text-align:center}
 </style>
@@ -24,31 +25,34 @@ footer{font-size:12px;color:var(--muted);text-align:center}
 <body>
 <div class="wrap">
   <div class="bar">
-    <div>
-      <h1>KickickLineDance</h1>
-      <p data-en="Admin dashboard · design preview" data-zh="管理后台 · 设计稿预览"></p>
-    </div>
-    <div class="lang" role="group" aria-label="Language">
+    <h1>KickickLineDance</h1>
+    <div class="seg" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-lang="zh" aria-pressed="false">中文</button>
     </div>
   </div>
-  <img id="shot" src="dashboard-en.jpg" alt="KickickLineDance admin dashboard">
-  <footer data-en="Sample data · buttons not active yet" data-zh="示范数据 · 按钮暂不可点"></footer>
+  <div class="seg screens" role="group" aria-label="Screen">
+    <button type="button" data-screen="admin" aria-pressed="true" data-en="Admin · Wendy" data-zh="管理后台 · Wendy"></button>
+    <button type="button" data-screen="student" aria-pressed="false" data-en="Student Home" data-zh="学生首页"></button>
+  </div>
+  <img id="shot" src="admin-en.jpg" alt="KickickLineDance screen design">
+  <footer data-en="Design preview · sample data · buttons not active yet" data-zh="设计稿预览 · 示范数据 · 按钮暂不可点"></footer>
 </div>
 <script>
 (function(){
-  var KEY='kld_lang';
-  function apply(l){
-    document.documentElement.lang = l==='zh' ? 'zh' : 'en';
-    document.getElementById('shot').src = 'dashboard-' + l + '.jpg';
-    document.querySelectorAll('[data-en]').forEach(function(e){ e.textContent = e.getAttribute('data-' + l); });
-    document.querySelectorAll('.lang button').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===l); });
-    try{ localStorage.setItem(KEY,l); }catch(e){}
+  var st={lang:'en',screen:'admin'};
+  try{ st.lang = localStorage.getItem('kld_lang')==='zh' ? 'zh' : 'en'; st.screen = localStorage.getItem('kld_screen')==='student' ? 'student' : 'admin'; }catch(e){}
+  function render(){
+    document.documentElement.lang = st.lang;
+    document.getElementById('shot').src = st.screen + '-' + st.lang + '.jpg';
+    document.querySelectorAll('[data-en]').forEach(function(e){ e.textContent = e.getAttribute('data-' + st.lang); });
+    document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
+    document.querySelectorAll('[data-screen]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.screen===st.screen); });
+    try{ localStorage.setItem('kld_lang',st.lang); localStorage.setItem('kld_screen',st.screen); }catch(e){}
   }
-  var saved='en'; try{ saved = localStorage.getItem(KEY) || 'en'; }catch(e){}
-  document.querySelectorAll('.lang button').forEach(function(b){ b.addEventListener('click', function(){ apply(b.dataset.lang); }); });
-  apply(saved==='zh' ? 'zh' : 'en');
+  document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click', function(){ st.lang=b.dataset.lang; render(); }); });
+  document.querySelectorAll('[data-screen]').forEach(function(b){ b.addEventListener('click', function(){ st.screen=b.dataset.screen; render(); }); });
+  render();
 })();
 </script>
 </body>
