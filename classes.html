@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Classes · KickickLineDance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: phone-width column; left region menu + top sub-area chips + class cards (same glass system as the home page). */
+:root{
+  --ink:#1E1B4B; --muted:#6B6688; --bg:#FCF3EE;
+  --rim:linear-gradient(135deg,#FFB3D6 0%,#fff 20%,#9FE6FF 40%,#fff 58%,#C9B2FF 76%,#FFC9A3 92%);
+  --cta:linear-gradient(90deg,#FF8A3D 0%,#FF4F8B 50%,#A63CF0 100%);
+  --hot:#E8475B;
+  --font:"Plus Jakarta Sans","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;
+  background:
+    radial-gradient(360px 360px at 0% 0%,rgba(255,205,215,.55),transparent 70%),
+    radial-gradient(360px 360px at 100% 30%,rgba(201,178,255,.45),transparent 70%),
+    radial-gradient(360px 360px at 0% 75%,rgba(255,201,163,.45),transparent 70%),
+    linear-gradient(#FCF3EE,#F6EEF8);
+  background-attachment:fixed;min-height:100vh}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(110px + env(safe-area-inset-bottom,0px))}
+.glass,.glass-pill{border:1.3px solid transparent;
+  background:linear-gradient(165deg,rgba(255,255,255,.82),rgba(255,255,255,.5)) padding-box, var(--rim) border-box;
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);
+  box-shadow:inset 0 1.5px 0 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 -10px 18px -14px rgba(139,92,246,.25), 0 8px 24px 0 rgba(139,92,246,.13), -8px 12px 24px -18px rgba(236,72,153,.35), 10px -4px 22px -18px rgba(6,182,212,.35)}
+.glass{border-radius:22px}
+.glass-pill{border-radius:999px}
+.cta{border:0;background:var(--cta);color:#fff;font-weight:700;border-radius:999px;padding:10px 18px;box-shadow:0 8px 18px -8px rgba(255,79,139,.6);text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+
+header{position:sticky;top:0;z-index:20;padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;display:flex;align-items:center;gap:10px}
+header::before{content:"";position:absolute;inset:0 -16px;z-index:-1;background:linear-gradient(rgba(252,243,238,.88),rgba(252,243,238,.6));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.back{width:44px;height:44px;display:grid;place-items:center;text-decoration:none;flex-shrink:0}
+.brand{font-weight:800;font-size:clamp(14px,4.1vw,18px);letter-spacing:-.4px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lang{display:flex;padding:3px;gap:2px}
+.lang button{border:0;background:transparent;font-weight:700;font-size:13px;padding:7px 9px;border-radius:999px}
+.lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+.title{font-size:24px;font-weight:800;margin:4px 0 12px}
+.layout{display:grid;grid-template-columns:108px 1fr;gap:10px;align-items:start}
+.regions{display:flex;flex-direction:column;gap:4px;position:sticky;top:76px;padding:6px}
+.regions button{border:0;background:transparent;text-align:left;font-weight:700;font-size:14px;padding:12px 8px 12px 12px;overflow-wrap:anywhere;border-radius:14px;line-height:1.2;position:relative}
+.regions button[aria-pressed="true"]{background:linear-gradient(90deg,rgba(255,79,139,.15),rgba(166,60,240,.10));color:#C02F7A}
+.regions button[aria-pressed="true"]::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:4px;background:var(--cta)}
+.main{min-width:0}
+.chips{display:flex;gap:7px;flex-wrap:wrap;padding:0 0 10px}
+.chips button{border:1.3px solid transparent;font-weight:700;font-size:14px;padding:8px 13px}
+.chips button[aria-pressed="true"]{background:var(--cta) padding-box,var(--cta) border-box;color:#fff;box-shadow:0 6px 14px -8px rgba(255,79,139,.7)}
+.list{display:flex;flex-direction:column;gap:12px}
+.cls{overflow:hidden;display:flex;flex-direction:column}
+.cls a.thumb{display:block;position:relative}
+.cls a.thumb img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top}
+.cls .body{padding:11px 13px 13px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.cls .nm{font-weight:800;font-size:16px;line-height:1.25}
+.cls .ln{font-size:13.5px;display:flex;gap:7px;align-items:flex-start}
+.cls .ln svg{flex-shrink:0;width:16px;height:16px;margin-top:2px;color:#A63CF0}
+.cls .lvl{align-self:flex-start;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:#E3F6EE;color:#14804F;margin-top:2px}
+.cls .cta{margin-top:8px;justify-content:center;padding:10px 14px;font-size:14.5px}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0;text-align:center}
+
+nav.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(448px,calc(100% - 24px));display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:6px 6px 8px;z-index:30}
+nav.tabbar a,nav.tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 0;border-radius:18px}
+nav.tabbar .on{color:#2563EB;background:linear-gradient(180deg,rgba(191,219,254,.7),rgba(255,255,255,.4))}
+nav.tabbar svg{width:24px;height:24px}
+nav.tabbar .qr{margin-top:-30px}
+nav.tabbar .qr .orb{width:62px;height:62px;border-radius:50%;background:var(--cta);display:grid;place-items:center;color:#fff;box-shadow:0 10px 24px -8px rgba(255,79,139,.7), inset 0 2px 0 rgba(255,255,255,.5);border:3px solid rgba(255,255,255,.8)}
+nav.tabbar .qr span{color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:40}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a class="back glass-pill" href="./" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></a>
+    <div class="brand">KickickLineDance</div>
+    <div class="lang glass-pill" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </header>
+  <h1 class="title" data-t="title"></h1>
+  <div class="layout">
+    <div class="regions glass" id="regions" role="group" aria-label="Region"></div>
+    <div class="main">
+      <div class="chips" id="subs" role="group" aria-label="Area"></div>
+      <div class="list" id="list"></div>
+      <p class="note" data-t="note"></p>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar glass" aria-label="Main">
+  <a href="./"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span data-t="navHome"></span></a>
+  <a href="classes.html" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-t="navClasses"></span></a>
+  <button type="button" class="qr" data-soon><span class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="13" width="4" height="4"/><path d="M13 7h4v4M7 13v4h4"/></svg></span><span data-t="navQR"></span></button>
+  <button type="button" data-soon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6"/></svg><span data-t="navCart"></span></button>
+  <button type="button" data-soon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-t="navMe"></span></button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  var T={
+    en:{title:'Classes',all:'All',enquire:'WhatsApp to join',note:'Tap a poster to see it full size. For fees, please ask the teacher.',navHome:'Home',navClasses:'Classes',navQR:'My QR',navCart:'Cart',navMe:'Me',soon:'Coming soon'},
+    zh:{title:'课程',all:'全部',enquire:'WhatsApp 报名',note:'点海报可看大图。学费请向老师询问。',navHome:'首页',navClasses:'课程',navQR:'我的 QR',navCart:'购物车',navMe:'我的',soon:'即将推出'}
+  };
+  /* Regions = left menu; subs = top chips. Cheras and OUG sit under KL. */
+  var REGIONS=[
+    {id:'kl',en:'KL',zh:'吉隆坡',subs:[['cheras','Cheras','蕉赖'],['oug','OUG','OUG']]},
+    {id:'puchong',en:'Puchong',zh:'蒲种',subs:[['bp','Bandar Puteri','Bandar Puteri'],['pp','Putra Prima','Putra Prima']]},
+    {id:'kajang',en:'Kajang',zh:'加影',subs:[]},
+    {id:'sk',en:'Seri Kembangan',zh:'Seri Kembangan',subs:[]}
+  ];
+  var ICON={
+    pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+    time:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+    user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>'
+  };
+  var CLASSES=[
+    {r:'kl',s:'cheras',img:'intake-cheras-wed.jpg',wa:'60123333332',
+      en:['Square Dance · Cheras','Komune Living & Wellness, Tasik Permaisuri','Wed 8:00–9:30 AM','Wendy Loh & Adelyn Pong','All levels'],
+      zh:['广场舞 · 蕉赖','Komune Living & Wellness, Tasik Permaisuri','星期三 早上 8:00–9:30','猫姐 Wendy Loh & Adelyn Pong','所有程度']},
+    {r:'kl',s:'oug',img:'intake-oug-sat.jpg',wa:'60123333332',
+      en:['Square Dance · OUG (Beginner)','Dewan Komuniti OUG','Sat 9:00–10:30 AM','Wendy Loh & Rowena Hu','Beginner'],
+      zh:['广场舞 · OUG（初级）','华联会所 Dewan Komuniti OUG','星期六 早上 9:00–10:30','Wendy Loh & Rowena Hu','初级']},
+    {r:'kl',s:'oug',img:'intake-oug-sat.jpg',wa:'60123333332',
+      en:['Square Dance · OUG (Intermediate)','Dewan Komuniti OUG','Sat 10:30 AM–12:00 PM','Wendy Loh & Rowena Hu','Intermediate'],
+      zh:['广场舞 · OUG（中级）','华联会所 Dewan Komuniti OUG','星期六 早上 10:30–12:00','Wendy Loh & Rowena Hu','中级']},
+    {r:'puchong',s:'bp',img:'intake-puchong-bandar-puteri-mon-oct.jpg',wa:'60123913295',
+      en:['Square Dance · Bandar Puteri','Tip Tap Toe Fitness Studio, 1-1 Jln Puteri 5/7','Mon 9:30–11:00 AM','Ann Soh & Wendy Loh','All levels'],
+      zh:['广场舞 · Bandar Puteri','Tip Tap Toe Fitness Studio, 1-1 Jln Puteri 5/7','星期一 早上 9:30–11:00','猫妹 Ann Soh & 猫姐 Wendy Loh','所有程度']},
+    {r:'puchong',s:'pp',img:'intake-puchong-putra-prima-thu.jpg',wa:'60123937771',
+      en:['Square Dance · Putra Prima','X2 Residency sky lounge, 23rd floor','Thu 7:00–8:30 PM','Wiwien Loh & Ann Soh','All levels'],
+      zh:['广场舞 · Putra Prima','X2 Residency 空中会所 23 楼','星期四 晚上 7:00–8:30','Wiwien Loh & Ann Soh','所有程度']},
+    {r:'kajang',s:'',img:'intake-kajang-thu.jpg',wa:'60163650795',
+      en:['Square Dance · Kajang','Kajang Hokkien Association','Thu 9:00 AM','Jane Tang','All ages'],
+      zh:['广场舞 · 加影','加影福建会馆','星期四 早上 9:00','Jane Tang 老师','欢迎所有年龄层']},
+    {r:'sk',s:'',img:'intake-seri-kembangan-fri.jpg',wa:'60162200262',
+      en:['Square Dance · Seri Kembangan','Dewan Dr. George Lim Ah Soo','Fri 6:00–7:30 PM','Melvin Tan & Wendy Loh','Beginner / Intermediate'],
+      zh:['广场舞 · Seri Kembangan','Dewan Dr. George Lim Ah Soo','星期五 晚上 6:00–7:30','猫哥 Melvin Tan & Wendy Loh','初级 / 中级']}
+  ];
+  var st={lang:'en',region:'kl',sub:'all'};
+  try{ if(localStorage.getItem('kld_lang')==='zh') st.lang='zh'; }catch(e){}
+  function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+  function line(icon,txt){ var d=el('div','ln'); d.innerHTML=ICON[icon]; d.appendChild(el('span',null,txt)); return d; }
+  function renderRegions(){
+    var box=document.getElementById('regions'); box.innerHTML='';
+    REGIONS.forEach(function(r){
+      var b=el('button',null,r[st.lang]); b.type='button'; b.setAttribute('aria-pressed',st.region===r.id);
+      b.onclick=function(){ st.region=r.id; st.sub='all'; renderAll(); }; box.appendChild(b);
+    });
+  }
+  function renderSubs(){
+    var reg=REGIONS.filter(function(r){return r.id===st.region;})[0], box=document.getElementById('subs'); box.innerHTML='';
+    box.hidden=!reg.subs.length; if(!reg.subs.length) return;
+    var allLabel=T[st.lang].all+' '+reg[st.lang];
+    [['all',allLabel,allLabel]].concat(reg.subs).forEach(function(x){
+      var b=el('button','glass-pill',st.lang==='zh'?x[2]:x[1]); b.type='button'; b.setAttribute('aria-pressed',st.sub===x[0]);
+      b.onclick=function(){ st.sub=x[0]; renderAll(); }; box.appendChild(b);
+    });
+  }
+  function renderList(){
+    var box=document.getElementById('list'); box.innerHTML='';
+    CLASSES.filter(function(c){ return c.r===st.region && (st.sub==='all'||c.s===st.sub); }).forEach(function(c){
+      var d=c[st.lang], card=el('div','cls glass');
+      var a=el('a','thumb'); a.href=c.img; a.target='_blank'; a.rel='noopener';
+      var im=el('img'); im.src=c.img; im.alt=d[0]; im.loading='lazy'; a.appendChild(im);
+      var b=el('div','body');
+      b.appendChild(el('div','nm',d[0])); b.appendChild(line('pin',d[1])); b.appendChild(line('time',d[2])); b.appendChild(line('user',d[3])); b.appendChild(el('span','lvl',d[4]));
+      var w=el('a','cta',T[st.lang].enquire); w.href='https://wa.me/'+c.wa; w.target='_blank'; w.rel='noopener'; b.appendChild(w);
+      card.appendChild(a); card.appendChild(b); box.appendChild(card);
+    });
+  }
+  function renderAll(){
+    var t=T[st.lang]; document.documentElement.lang=st.lang==='zh'?'zh':'en';
+    document.querySelectorAll('[data-t]').forEach(function(e){ e.textContent=t[e.getAttribute('data-t')]; });
+    document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
+    renderRegions(); renderSubs(); renderList();
+    try{ localStorage.setItem('kld_lang',st.lang); }catch(e){}
+  }
+  var tt; function soon(e){ if(e) e.preventDefault(); var x=document.getElementById('toast'); x.textContent=T[st.lang].soon; x.hidden=false; clearTimeout(tt); tt=setTimeout(function(){x.hidden=true;},1600); }
+  document.querySelectorAll('[data-soon]').forEach(function(b){ b.addEventListener('click',soon); });
+  document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click',function(){ st.lang=b.dataset.lang; renderAll(); }); });
+  renderAll();
+})();
+</script>
+</body>
+</html>

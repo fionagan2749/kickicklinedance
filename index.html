@@ -224,7 +224,7 @@ nav.tabbar .qr span{color:var(--ink)}
 
 <nav class="tabbar glass" aria-label="Main">
   <a href="./" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span data-t="navHome"></span></a>
-  <a href="designs.html#classes" data-screen-link="classes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-t="navClasses"></span></a>
+  <a href="classes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-t="navClasses"></span></a>
   <button type="button" class="qr" data-soon><span class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="13" width="4" height="4"/><path d="M13 7h4v4M7 13v4h4"/></svg></span><span data-t="navQR"></span></button>
   <button type="button" data-soon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6"/></svg><span data-t="navCart"></span></button>
   <button type="button" data-soon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-t="navMe"></span></button>
@@ -253,13 +253,13 @@ nav.tabbar .qr span{color:var(--ink)}
   };
   var INTAKE=[
     {img:'intake-seri-kembangan-fri.jpg',area:'sk',en:['Seri Kembangan','Fri 6:00–7:30 PM','Teacher Melvin & Wendy'],zh:['Seri Kembangan','星期五 晚上 6:00–7:30','猫哥 & Wendy 老师']},
-    {img:'intake-cheras-wed.jpg',area:'cheras',en:['Cheras · Tasik Permaisuri','Wed 8:00–9:30 AM','Wendy Loh & Adelyn Pong'],zh:['蕉赖 · Tasik Permaisuri','星期三 早上 8:00–9:30','猫姐 Wendy Loh & Adelyn Pong']},
+    {img:'intake-cheras-wed.jpg',area:'kl',en:['Cheras · Tasik Permaisuri','Wed 8:00–9:30 AM','Wendy Loh & Adelyn Pong'],zh:['蕉赖 · Tasik Permaisuri','星期三 早上 8:00–9:30','猫姐 Wendy Loh & Adelyn Pong']},
     {img:'intake-puchong-bandar-puteri-mon-oct.jpg',area:'puchong',en:['Puchong · Bandar Puteri','Mon 9:30–11:00 AM','Ann Soh & Wendy Loh'],zh:['蒲种 · Bandar Puteri','星期一 早上 9:30–11:00','猫妹 Ann Soh & 猫姐 Wendy Loh']},
     {img:'intake-puchong-putra-prima-thu.jpg',area:'puchong',en:['Puchong · Putra Prima','Thu 7:00–8:30 PM','Wiwien Loh & Ann Soh'],zh:['蒲种 · Putra Prima','星期四 晚上 7:00–8:30','Wiwien Loh & Ann Soh']},
     {img:'intake-kajang-thu.jpg',area:'kajang',en:['Kajang · Hokkien Association','Thu 9:00 AM','Teacher Jane Tang'],zh:['加影 · 福建会馆','星期四 早上 9:00','Jane Tang 老师']},
-    {img:'intake-oug-sat.jpg',area:'oug',en:['OUG · Dewan Komuniti','Sat 9:00 AM–12:00 PM','Wendy Loh & Rowena Hu'],zh:['OUG · 华联会所','星期六 早上 9:00–12:00','Wendy Loh & Rowena Hu']}
+    {img:'intake-oug-sat.jpg',area:'kl',en:['OUG · Dewan Komuniti','Sat 9:00 AM–12:00 PM','Wendy Loh & Rowena Hu'],zh:['OUG · 华联会所','星期六 早上 9:00–12:00','Wendy Loh & Rowena Hu']}
   ];
-  var AREAS=[['all'],['sk','Seri Kembangan','Seri Kembangan'],['cheras','Cheras','蕉赖'],['puchong','Puchong','蒲种'],['kajang','Kajang','加影'],['oug','OUG','OUG']];
+  var AREAS=[['all'],['kl','KL','吉隆坡'],['puchong','Puchong','蒲种'],['kajang','Kajang','加影'],['sk','Seri Kembangan','Seri Kembangan']];
   var TEACHERS=[
     {img:'t-wendy.jpg',en:['Wendy Loh','Founder · Instructor'],zh:['猫姐 Wendy Loh','创办人 · 导师']},
     {img:'t-melvin.jpg',en:['Melvin','Instructor · Seri Kembangan'],zh:['猫哥 Melvin','导师 · Seri Kembangan']},
