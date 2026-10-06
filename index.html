@@ -4,55 +4,323 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KickickLineDance</title>
+<meta name="description" content="KICKICK Line Dance · 猫姐广场舞 — line dance & square dance classes in the Klang Valley.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#F6F1FA;--fg:#24203A;--muted:#7A7390;--line:#E6DCF0;--pill:#FFFFFF;--on:#24203A;--onfg:#FFFFFF}
-@media (prefers-color-scheme: dark){:root{--bg:#17141F;--fg:#F2EEF8;--muted:#A79FBA;--line:#2E2840;--pill:#231E2E;--on:#F2EEF8;--onfg:#17141F;color-scheme:dark}}
+/* Layout: one phone-width column; glass cards on a pastel bloom background; sticky glass header, floating glass nav. */
+:root{
+  --ink:#1E1B4B; --muted:#6B6688; --bg:#FCF3EE;
+  --rim:linear-gradient(135deg,#FFB3D6 0%,#fff 20%,#9FE6FF 40%,#fff 58%,#C9B2FF 76%,#FFC9A3 92%);
+  --cta:linear-gradient(90deg,#FF8A3D 0%,#FF4F8B 50%,#A63CF0 100%);
+  --new:#1FA971; --hot:#E8475B;
+  --font:"Plus Jakarta Sans","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
-.wrap{max-width:440px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.bar h1{font-size:17px;margin:0;font-weight:700}
-.seg{display:flex;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:3px;flex-shrink:0}
-.seg button{white-space:nowrap;border:0;background:transparent;color:var(--fg);font:inherit;font-size:14px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--on);color:var(--onfg)}
-.seg button:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
-.screens{width:100%}
-.screens button{flex:1;padding:7px 8px;font-size:13px}
-img{display:block;width:100%;height:auto;border-radius:22px;border:1px solid var(--line)}
-footer{font-size:12px;color:var(--muted);text-align:center}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;
+  background:
+    radial-gradient(360px 360px at 0% 0%,rgba(255,205,215,.55),transparent 70%),
+    radial-gradient(360px 360px at 100% 30%,rgba(201,178,255,.45),transparent 70%),
+    radial-gradient(360px 360px at 0% 75%,rgba(255,201,163,.45),transparent 70%),
+    linear-gradient(#FCF3EE,#F6EEF8);
+  background-attachment:fixed;min-height:100vh}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(110px + env(safe-area-inset-bottom,0px))}
+
+/* glass */
+.glass,.glass-pill{border:1.3px solid transparent;
+  background:linear-gradient(165deg,rgba(255,255,255,.82),rgba(255,255,255,.5)) padding-box, var(--rim) border-box;
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);
+  box-shadow:inset 0 1.5px 0 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 -10px 18px -14px rgba(139,92,246,.25), 0 8px 24px 0 rgba(139,92,246,.13), -8px 12px 24px -18px rgba(236,72,153,.35), 10px -4px 22px -18px rgba(6,182,212,.35)}
+.glass{border-radius:24px}
+.glass-pill{border-radius:999px}
+.cta{border:0;background:var(--cta);color:#fff;font-weight:700;border-radius:999px;padding:10px 18px;box-shadow:0 8px 18px -8px rgba(255,79,139,.6);text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+
+/* header */
+header{position:sticky;top:0;z-index:20;padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;display:flex;align-items:center;gap:10px}
+.logo{width:46px;height:46px;border-radius:15px;overflow:hidden;flex-shrink:0}
+.logo img{width:100%;height:100%;object-fit:cover}
+.brand{font-weight:800;font-size:clamp(14px,4.1vw,18px);letter-spacing:-.4px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header::before{content:"";position:absolute;inset:0 -16px;z-index:-1;background:linear-gradient(rgba(252,243,238,.85),rgba(252,243,238,.55));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.icon-btn{width:44px;height:44px;display:grid;place-items:center;border:1.3px solid transparent;position:relative}
+.icon-btn .dot{position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--hot);border:2px solid #fff}
+.lang{display:flex;padding:3px;gap:2px}
+.lang button{border:0;background:transparent;font-weight:700;font-size:13px;padding:7px 9px;border-radius:999px}
+.lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+section{margin-top:22px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-head h2{font-size:19px;margin:0;font-weight:800;display:flex;align-items:center;gap:8px}
+.sec-head a{font-size:14px;font-weight:700;color:#A63CF0;text-decoration:none}
+.badge{font-size:11px;font-weight:800;color:#fff;background:var(--hot);border-radius:999px;padding:2px 8px;letter-spacing:.3px}
+
+/* hero: swipeable banner (team photo + KICKICK poster) */
+.hero{margin-top:6px;position:relative;border-radius:26px;overflow:hidden;border:1.3px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--rim) border-box;box-shadow:0 18px 40px -18px rgba(166,60,240,.55)}
+.slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.slides::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;position:relative;aspect-ratio:2.05/1;overflow:hidden;background:#2a1030}
+.slide>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slide .blur{filter:blur(18px) saturate(1.3);transform:scale(1.2);opacity:.85}
+.slide .fit{object-fit:contain}
+.slide .cap{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;color:#fff;background:linear-gradient(transparent,rgba(30,12,40,.78))}
+.slide .cap small{display:block;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;opacity:.9}
+.slide .cap b{display:block;font-size:17px;line-height:1.2;font-weight:800;text-wrap:balance}
+.dots{position:absolute;top:10px;right:12px;display:flex;gap:5px}
+.dots button{width:8px;height:8px;border-radius:999px;border:0;padding:0;background:rgba(255,255,255,.55)}
+.dots button[aria-current="true"]{width:20px;background:#fff}
+.hero-cta{display:flex;gap:10px;margin-top:12px}
+.hero-cta a{flex:1;justify-content:center}
+.hero-cta .ghost{border:1.3px solid transparent;font-weight:700;border-radius:999px;padding:10px 14px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+
+/* invite */
+.invite{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 10px;margin-top:14px}
+.invite img{width:40px;height:40px;object-fit:contain}
+.invite span{flex:1;font-weight:700;font-size:15px;min-width:0}
+.invite .cta{padding:9px 14px;font-size:14px}
+
+/* carousels */
+.rail{display:flex;align-items:flex-start;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin:0 -2px;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.rail>*{scroll-snap-align:start;flex-shrink:0}
+
+.act{width:78%;max-width:320px;display:flex;overflow:hidden;min-height:132px;text-decoration:none}
+.act .txt{padding:14px 4px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.tag{align-self:flex-start;background:linear-gradient(90deg,#FF4F8B,#E040C8);color:#fff;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 9px}
+.act b{font-size:16.5px;line-height:1.2}
+.act small{font-size:14px;color:var(--muted);font-weight:600}
+.act img{width:46%;object-fit:cover;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%)}
+
+/* new intake */
+.chips{display:flex;gap:7px;overflow-x:auto;padding:0 2px 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex-shrink:0;border:1.3px solid transparent;font-weight:700;font-size:14px;padding:8px 14px}
+.chips button[aria-pressed="true"]{background:var(--cta) padding-box,var(--cta) border-box;color:#fff;box-shadow:0 6px 14px -8px rgba(255,79,139,.7)}
+.poster{width:58%;max-width:240px;overflow:hidden;display:flex;flex-direction:column}
+.poster a{position:relative;display:block}
+.poster img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top}
+.poster .new{position:absolute;top:10px;left:10px;background:var(--new);color:#fff;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;box-shadow:0 4px 10px -4px rgba(0,0,0,.35)}
+.poster .info{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px}
+.poster .area{font-weight:800;font-size:15.5px;line-height:1.25}
+.poster .when{font-size:14px;font-weight:600}
+.poster .who{font-size:12.5px;color:var(--muted)}
+.poster .cta{margin-top:8px;justify-content:center;padding:8px 14px;font-size:14px}
+.empty{padding:18px;color:var(--muted);font-size:14px}
+
+/* tickets */
+.ticket{display:flex;align-items:stretch;overflow:hidden;min-height:118px}
+.ticket .txt{padding:14px 0 14px 16px;flex:1;display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0}
+.ticket b{font-size:16.5px}
+.price{display:flex;align-items:baseline;gap:8px}
+.price strong{font-size:32px;color:#E5283C;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.price s{color:var(--muted);font-weight:700}
+.ticket .side{width:42%;position:relative;display:flex;align-items:flex-end;justify-content:flex-end;padding:10px;background-size:cover;background-position:center}
+.ticket .save{position:absolute;left:-6px;top:12px;background:#E5283C;color:#fff;font-weight:800;font-size:12.5px;border-radius:12px;padding:6px 8px;text-align:center;line-height:1.1;transform:rotate(-6deg)}
+
+/* teachers */
+.teacher{width:132px;overflow:hidden;text-align:center;text-decoration:none}
+.teacher img{display:block;width:100%;aspect-ratio:1;object-fit:cover;object-position:top}
+.teacher .nm{font-weight:800;font-size:15px;padding:8px 6px 0;line-height:1.2}
+.teacher .rl{font-size:12.5px;color:var(--muted);padding:2px 6px 10px}
+
+/* group */
+.group{display:flex;align-items:center;gap:14px;padding:16px}
+.group img{width:44%;max-width:180px;mix-blend-mode:multiply}
+.group p{margin:0;font-size:14px;color:var(--muted)}
+.group b{display:block;font-size:16px;color:var(--ink);margin-bottom:2px}
+
+.foot{margin:22px 0 0;text-align:center;font-size:12.5px;color:var(--muted)}
+.foot a{color:#A63CF0;font-weight:700}
+
+/* bottom nav */
+nav.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(448px,calc(100% - 24px));display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:6px 6px 8px;z-index:30}
+nav.tabbar a,nav.tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 0;border-radius:18px}
+nav.tabbar .on{color:#2563EB;background:linear-gradient(180deg,rgba(191,219,254,.7),rgba(255,255,255,.4))}
+nav.tabbar svg{width:24px;height:24px}
+nav.tabbar .qr{margin-top:-30px}
+nav.tabbar .qr .orb{width:62px;height:62px;border-radius:50%;background:var(--cta);display:grid;place-items:center;color:#fff;box-shadow:0 10px 24px -8px rgba(255,79,139,.7), inset 0 2px 0 rgba(255,255,255,.5);border:3px solid rgba(255,255,255,.8)}
+nav.tabbar .qr span{color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:40}
+@media (prefers-reduced-motion:no-preference){.rail{scroll-behavior:smooth}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="bar">
-    <h1>KickickLineDance</h1>
-    <div class="seg" role="group" aria-label="Language">
+<div class="app">
+  <header>
+    <div class="logo glass"><img src="app-logo.png" alt=""></div>
+    <div class="brand">KickickLineDance</div>
+    <button class="icon-btn glass" type="button" data-soon aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot"></span></button>
+    <div class="lang glass-pill" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-lang="zh" aria-pressed="false">中文</button>
     </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="slides" id="slides">
+      <div class="slide"><img src="hero-team.jpg" alt="KICKICK Line Dance teachers"><div class="cap"><small data-t="heroEyebrow"></small><b data-t="heroTitle"></b></div></div>
+      <div class="slide"><img class="blur" src="hero-kickick.jpg" alt=""><img class="fit" src="hero-kickick.jpg" alt="KICKICK Line Dance"></div>
+    </div>
+    <div class="dots" id="dots"><button type="button" aria-label="Slide 1" aria-current="true"></button><button type="button" aria-label="Slide 2"></button></div>
   </div>
-  <div class="seg screens" role="group" aria-label="Screen">
-    <button type="button" data-screen="admin" aria-pressed="true" data-en="Admin · Wendy" data-zh="管理后台 · Wendy"></button>
-    <button type="button" data-screen="student" aria-pressed="false" data-en="Student Home" data-zh="学生首页"></button>
-    <button type="button" data-screen="classes" aria-pressed="false" data-en="Classes" data-zh="课程"></button>
+  <div class="hero-cta">
+    <a class="cta" href="#intake" data-t="heroBtn1"></a>
+    <a class="ghost glass-pill" href="#teachers" data-t="heroBtn2"></a>
   </div>
-  <img id="shot" src="admin-en.jpg" alt="KickickLineDance screen design">
-  <footer data-en="Design preview · sample data · buttons not active yet" data-zh="设计稿预览 · 示范数据 · 按钮暂不可点"></footer>
+
+  <div class="invite glass-pill">
+    <img src="gift.png" alt="">
+    <span data-t="invite"></span>
+    <button class="cta" type="button" data-soon><span data-t="inviteBtn"></span> ›</button>
+  </div>
+
+  <section>
+    <div class="sec-head"><h2 data-t="actTitle"></h2><a href="#" data-soon data-t="seeAll"></a></div>
+    <div class="rail">
+      <div class="poster glass">
+        <a href="event-nasi-lemak.jpg" target="_blank" rel="noopener"><img src="event-nasi-lemak.jpg" alt="Nasi Lemak Square Dance Workshop Day 3.0"><span class="new" style="background:var(--hot)" data-t="soldOut"></span></a>
+        <div class="info"><span class="area" data-t="ev1"></span><span class="when" data-t="ev1d"></span><span class="who" data-t="ev1v"></span></div>
+      </div>
+      <a class="act glass" href="#" data-soon><div class="txt"><span class="tag" data-t="member"></span><b data-t="act1"></b><small data-t="act1d"></small></div><img src="act-1.jpg" alt=""></a>
+      <a class="act glass" href="#" data-soon><div class="txt"><span class="tag" data-t="member"></span><b data-t="act2"></b><small data-t="act2d"></small></div><img src="act-2.jpg" alt=""></a>
+    </div>
+  </section>
+
+  <section id="intake">
+    <div class="sec-head"><h2><span data-t="intakeTitle"></span><span class="badge">HOT</span></h2></div>
+    <div class="chips" id="areas" role="group" aria-label="Area"></div>
+    <div class="rail" id="posters"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2 data-t="ticketTitle"></h2><a href="#" data-soon data-t="seeAll"></a></div>
+    <div class="ticket glass">
+      <div class="txt"><b data-t="ticket1"></b><div class="price"><strong>RM50</strong><s>RM80</s></div><small style="color:var(--muted)" data-t="ticket1d"></small></div>
+      <div class="side" style="background-image:url(ticket-bg.jpg)"><span class="save" data-t="save"></span><button class="cta" type="button" data-soon style="padding:8px 14px;font-size:14px" data-t="book"></button></div>
+    </div>
+  </section>
+
+  <section id="teachers">
+    <div class="sec-head"><h2 data-t="teacherTitle"></h2></div>
+    <div class="rail" id="teacherRail"></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2 data-t="groupTitle"></h2></div>
+    <div class="group glass">
+      <img src="kickick-logo.png" alt="KICKICK Line Dance">
+      <p><b data-t="groupName"></b><span data-t="groupSub"></span></p>
+    </div>
+  </section>
+
+  <p class="foot"><span data-t="sample"></span> · <a href="designs.html" data-t="designs"></a></p>
 </div>
+
+<nav class="tabbar glass" aria-label="Main">
+  <a href="./" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span data-t="navHome"></span></a>
+  <a href="designs.html#classes" data-screen-link="classes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-t="navClasses"></span></a>
+  <button type="button" class="qr" data-soon><span class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="13" width="4" height="4"/><path d="M13 7h4v4M7 13v4h4"/></svg></span><span data-t="navQR"></span></button>
+  <button type="button" data-soon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6"/></svg><span data-t="navCart"></span></button>
+  <button type="button" data-soon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-t="navMe"></span></button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
 <script>
 (function(){
-  var st={lang:'en',screen:'admin'};
-  try{ st.lang = localStorage.getItem('kld_lang')==='zh' ? 'zh' : 'en'; var sc = localStorage.getItem('kld_screen'); st.screen = (sc==='student'||sc==='classes') ? sc : 'admin'; }catch(e){}
-  function render(){
-    document.documentElement.lang = st.lang;
-    document.getElementById('shot').src = st.screen + '-' + st.lang + '.jpg';
-    document.querySelectorAll('[data-en]').forEach(function(e){ e.textContent = e.getAttribute('data-' + st.lang); });
-    document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
-    document.querySelectorAll('[data-screen]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.screen===st.screen); });
-    try{ localStorage.setItem('kld_lang',st.lang); localStorage.setItem('kld_screen',st.screen); }catch(e){}
+  var T={
+    en:{heroEyebrow:'KICKICK Line Dance · 猫姐广场舞',heroTitle:'Dance · Health · Community · Joy',heroSub:'Line dance & square dance classes across the Klang Valley — no experience needed.',heroBtn1:'New classes',heroBtn2:'Meet our teachers',
+      invite:'Invite friends, get FREE classes',inviteBtn:'Invite',actTitle:'Upcoming Activities',seeAll:'See all →',member:'Member Privilege',
+      soldOut:'SOLD OUT',ev1:'Nasi Lemak Square Dance Workshop Day 3.0',ev1d:'Sun 13 Sep 2026 · 11 AM–3 PM',ev1v:'KL Wellness City, Bukit Jalil · RM28 · Wendy Loh & Melvin Tan',
+      act1:'October Performance',act1d:'12 Oct 2026',act2:'Monthly Gathering',act2d:'26 Oct 2026',
+      intakeTitle:'New Intake',all:'All',join:'Join',ticketTitle:'Event Tickets',ticket1:'Year-End Gala Night',ticket1d:'Limited seats',save:'Save 38%',book:'Book Now ›',
+      teacherTitle:'Our Teachers',groupTitle:'Our Group',groupName:'KICKICK Line Dance',groupSub:'猫姐广场舞 · 猫哥广场舞 — 20+ years of dancing together',
+      sample:'Activities & tickets are sample content',designs:'Design previews',
+      navHome:'Home',navClasses:'Classes',navQR:'My QR',navCart:'Cart',navMe:'Me',soon:'Coming soon'},
+    zh:{heroEyebrow:'KICKICK Line Dance · 猫姐广场舞',heroTitle:'跳出健康 · 跳出快乐',heroSub:'巴生谷多个地点开设排舞与广场舞课程，有无跳舞经验均可参加！',heroBtn1:'新班招生',heroBtn2:'认识老师',
+      invite:'邀请朋友，免费上课',inviteBtn:'立即邀请',actTitle:'近期活动',seeAll:'查看全部 →',member:'会员专享',
+      soldOut:'售罄',ev1:'辣死你妈 3.0 · 广场舞体验日',ev1d:'2026年9月13日 星期日 · 上午11点–下午3点',ev1v:'KL Wellness City, Bukit Jalil · RM28 · Wendy Loh & 猫哥 Melvin Tan',
+      act1:'十月表演',act1d:'2026年10月12日',act2:'每月聚会',act2d:'2026年10月26日',
+      intakeTitle:'新班招生',all:'全部',join:'报名',ticketTitle:'活动门票',ticket1:'年终晚会',ticket1d:'名额有限',save:'省 38%',book:'立即订票 ›',
+      teacherTitle:'我们的老师',groupTitle:'我们的团队',groupName:'KICKICK Line Dance',groupSub:'猫姐广场舞 · 猫哥广场舞 —— 20 多年一起跳舞',
+      sample:'活动与门票为示范内容',designs:'设计稿预览',
+      navHome:'首页',navClasses:'课程',navQR:'我的 QR',navCart:'购物车',navMe:'我的',soon:'即将推出'}
+  };
+  var INTAKE=[
+    {img:'intake-seri-kembangan-fri.jpg',area:'sk',en:['Seri Kembangan','Fri 6:00–7:30 PM','Teacher Melvin & Wendy'],zh:['Seri Kembangan','星期五 晚上 6:00–7:30','猫哥 & Wendy 老师']},
+    {img:'intake-cheras-wed.jpg',area:'cheras',en:['Cheras · Tasik Permaisuri','Wed 8:00–9:30 AM','Wendy Loh & Adelyn Pong'],zh:['蕉赖 · Tasik Permaisuri','星期三 早上 8:00–9:30','猫姐 Wendy Loh & Adelyn Pong']},
+    {img:'intake-puchong-bandar-puteri-mon-oct.jpg',area:'puchong',en:['Puchong · Bandar Puteri','Mon 9:30–11:00 AM','Ann Soh & Wendy Loh'],zh:['蒲种 · Bandar Puteri','星期一 早上 9:30–11:00','猫妹 Ann Soh & 猫姐 Wendy Loh']},
+    {img:'intake-puchong-putra-prima-thu.jpg',area:'puchong',en:['Puchong · Putra Prima','Thu 7:00–8:30 PM','Wiwien Loh & Ann Soh'],zh:['蒲种 · Putra Prima','星期四 晚上 7:00–8:30','Wiwien Loh & Ann Soh']},
+    {img:'intake-kajang-thu.jpg',area:'kajang',en:['Kajang · Hokkien Association','Thu 9:00 AM','Teacher Jane Tang'],zh:['加影 · 福建会馆','星期四 早上 9:00','Jane Tang 老师']},
+    {img:'intake-oug-sat.jpg',area:'oug',en:['OUG · Dewan Komuniti','Sat 9:00 AM–12:00 PM','Wendy Loh & Rowena Hu'],zh:['OUG · 华联会所','星期六 早上 9:00–12:00','Wendy Loh & Rowena Hu']}
+  ];
+  var AREAS=[['all'],['sk','Seri Kembangan','Seri Kembangan'],['cheras','Cheras','蕉赖'],['puchong','Puchong','蒲种'],['kajang','Kajang','加影'],['oug','OUG','OUG']];
+  var TEACHERS=[
+    {img:'t-wendy.jpg',en:['Wendy Loh','Founder · Instructor'],zh:['猫姐 Wendy Loh','创办人 · 导师']},
+    {img:'t-melvin.jpg',en:['Melvin','Instructor · Seri Kembangan'],zh:['猫哥 Melvin','导师 · Seri Kembangan']},
+    {img:'t-ann.jpg',en:['Ann Soh','Instructor · Puchong'],zh:['猫妹 Ann Soh','导师 · 蒲种']},
+    {img:'t-adelyn.jpg',en:['Adelyn Pong','Instructor · Cheras'],zh:['Adelyn Pong','导师 · 蕉赖']},
+    {img:'t-jane.jpg',en:['Jane Tang','Instructor · Kajang'],zh:['Jane Tang','导师 · 加影']},
+    {img:'t-wiwien.jpg',en:['Wiwien Loh','Instructor · Puchong'],zh:['Wiwien Loh','导师 · 蒲种']},
+    {img:'t-rowena.jpg',en:['Rowena Hu','Co-instructor · OUG'],zh:['Rowena Hu','协助导师 · OUG']}
+  ];
+  var st={lang:'en',area:'all'};
+  try{ if(localStorage.getItem('kld_lang')==='zh') st.lang='zh'; }catch(e){}
+
+  function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+  function renderIntake(){
+    var t=T[st.lang], a=document.getElementById('areas'); a.innerHTML='';
+    AREAS.forEach(function(x){
+      var b=el('button','glass-pill', x[0]==='all'?t.all:(st.lang==='zh'?x[2]:x[1])); b.type='button';
+      b.setAttribute('aria-pressed', st.area===x[0]);
+      b.onclick=function(){ st.area=x[0]; renderIntake(); };
+      a.appendChild(b);
+    });
+    var r=document.getElementById('posters'); r.innerHTML='';
+    INTAKE.filter(function(k){return st.area==='all'||k.area===st.area;}).forEach(function(k){
+      var d=k[st.lang], c=el('div','poster glass');
+      var link=el('a'); link.href=k.img; link.target='_blank'; link.rel='noopener';
+      var im=el('img'); im.src=k.img; im.alt=d[0]; im.loading='lazy'; link.appendChild(im); link.appendChild(el('span','new','NEW'));
+      var info=el('div','info'); info.appendChild(el('span','area',d[0])); info.appendChild(el('span','when',d[1])); info.appendChild(el('span','who',d[2]));
+      var j=el('button','cta',t.join); j.type='button'; j.setAttribute('data-soon',''); j.onclick=soon; info.appendChild(j);
+      c.appendChild(link); c.appendChild(info); r.appendChild(c);
+    });
+    r.scrollLeft=0;
   }
-  document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click', function(){ st.lang=b.dataset.lang; render(); }); });
-  document.querySelectorAll('[data-screen]').forEach(function(b){ b.addEventListener('click', function(){ st.screen=b.dataset.screen; render(); }); });
+  function renderTeachers(){
+    var r=document.getElementById('teacherRail'); r.innerHTML='';
+    TEACHERS.forEach(function(p){
+      var d=p[st.lang], c=el('div','teacher glass'), im=el('img'); im.src=''+p.img; im.alt=d[0]; im.loading='lazy';
+      c.appendChild(im); c.appendChild(el('div','nm',d[0])); c.appendChild(el('div','rl',d[1])); r.appendChild(c);
+    });
+  }
+  function render(){
+    var t=T[st.lang]; document.documentElement.lang=st.lang==='zh'?'zh':'en';
+    document.querySelectorAll('[data-t]').forEach(function(e){ e.textContent=t[e.getAttribute('data-t')]; });
+    document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
+    renderIntake(); renderTeachers();
+    try{ localStorage.setItem('kld_lang',st.lang); }catch(e){}
+  }
+  var tt; function soon(e){ if(e) e.preventDefault(); var x=document.getElementById('toast'); x.textContent=T[st.lang].soon; x.hidden=false; clearTimeout(tt); tt=setTimeout(function(){x.hidden=true;},1600); }
+  document.querySelectorAll('[data-soon]').forEach(function(b){ b.addEventListener('click',soon); });
+  document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click',function(){ st.lang=b.dataset.lang; render(); }); });
+  document.querySelectorAll('[data-screen-link]').forEach(function(a){ a.addEventListener('click',function(){ try{ localStorage.setItem('kld_screen',a.dataset.screenLink); }catch(e){} }); });
+  /* hero slider: dots + gentle autoplay, paused when the viewer interacts or prefers reduced motion */
+  (function(){
+    var sl=document.getElementById('slides'), dots=[].slice.call(document.querySelectorAll('#dots button')), i=0, timer;
+    function go(n){ i=(n+dots.length)%dots.length; sl.scrollTo({left:sl.clientWidth*i,behavior:'smooth'}); }
+    function mark(){ var n=Math.round(sl.scrollLeft/sl.clientWidth); dots.forEach(function(d,k){ d.setAttribute('aria-current', k===n); }); i=n; }
+    sl.addEventListener('scroll',function(){ requestAnimationFrame(mark); });
+    dots.forEach(function(d,k){ d.addEventListener('click',function(){ stop(); go(k); }); });
+    function stop(){ clearInterval(timer); timer=null; }
+    sl.addEventListener('touchstart',stop,{passive:true}); sl.addEventListener('pointerdown',stop);
+    if(!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)) timer=setInterval(function(){ go(i+1); },4500);
+  })();
   render();
 })();
 </script>

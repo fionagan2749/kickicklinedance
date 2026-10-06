@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KickickLineDance</title>
+<style>
+:root{--bg:#F6F1FA;--fg:#24203A;--muted:#7A7390;--line:#E6DCF0;--pill:#FFFFFF;--on:#24203A;--onfg:#FFFFFF;--new:#1FA971;--hot:#E8475B}
+@media (prefers-color-scheme: dark){:root{--bg:#17141F;--fg:#F2EEF8;--muted:#A79FBA;--line:#2E2840;--pill:#231E2E;--on:#F2EEF8;--onfg:#17141F;color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
+.wrap{max-width:440px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bar h1{font-size:17px;margin:0;font-weight:700}
+.seg{display:flex;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:3px;flex-shrink:0}
+.seg button{white-space:nowrap;border:0;background:transparent;color:var(--fg);font:inherit;font-size:14px;font-weight:700;padding:7px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--on);color:var(--onfg)}
+button:focus-visible,a:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
+.screens{display:grid;grid-template-columns:1fr 1fr;border-radius:18px;gap:2px}
+.screens button{padding:8px 6px;font-size:13.5px;border-radius:14px}
+.shot{display:block;width:100%;height:auto;border-radius:22px;border:1px solid var(--line)}
+footer{font-size:12px;color:var(--muted);text-align:center}
+/* New intake */
+.intake h2{font-size:18px;margin:2px 0 0;display:flex;align-items:center;gap:8px}
+.badge{font-size:11px;font-weight:700;color:#fff;background:var(--hot);border-radius:999px;padding:2px 8px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex-shrink:0;border:1px solid var(--line);background:var(--pill);color:var(--fg);font:inherit;font-size:13.5px;font-weight:600;padding:7px 13px;border-radius:999px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--on);color:var(--onfg);border-color:var(--on)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.card{background:var(--pill);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.card a{display:block;position:relative}
+.card img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top}
+.card .new{position:absolute;top:8px;left:8px;background:var(--new);color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px}
+.card .info{padding:9px 10px 11px;display:flex;flex-direction:column;gap:2px}
+.card .area{font-size:14.5px;font-weight:700}
+.card .when{font-size:13px}
+.card .who{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <h1><a href="./" style="color:inherit;text-decoration:none">← KickickLineDance</a></h1>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </div>
+  <div class="seg screens" role="group" aria-label="Screen">
+    <button type="button" data-screen="admin" aria-pressed="true" data-en="Admin · Wendy" data-zh="管理后台 · Wendy"></button>
+    <button type="button" data-screen="student" aria-pressed="false" data-en="Student Home" data-zh="学生首页"></button>
+    <button type="button" data-screen="classes" aria-pressed="false" data-en="Classes" data-zh="课程"></button>
+    <button type="button" data-screen="intake" aria-pressed="false" data-en="New Intake 🔥" data-zh="新班招生 🔥"></button>
+  </div>
+
+  <img id="shot" class="shot" src="admin-en.jpg" alt="KickickLineDance screen design">
+
+  <section class="intake" id="intake" hidden>
+    <h2><span data-en="New Intake" data-zh="新班招生"></span><span class="badge">HOT</span></h2>
+    <div class="chips" role="group" aria-label="Area" id="areas"></div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <footer id="foot" data-en="Design preview · sample data · buttons not active yet" data-zh="设计稿预览 · 示范数据 · 按钮暂不可点"></footer>
+</div>
+<script>
+(function(){
+  var CLASSES=[
+    {img:'intake-seri-kembangan-fri.jpg', area:'sk', en:['Seri Kembangan','Fri 6:00–7:30 PM','Teacher Melvin & Wendy'], zh:['Seri Kembangan','星期五 晚上 6:00–7:30','猫哥 & Wendy 老师']},
+    {img:'intake-cheras-wed.jpg', area:'cheras', en:['Cheras · Tasik Permaisuri','Wed 8:00–9:30 AM','Wendy Loh & Adelyn Pong'], zh:['蕉赖 · Tasik Permaisuri','星期三 早上 8:00–9:30','猫姐 Wendy Loh & Adelyn Pong']},
+    {img:'intake-puchong-bandar-puteri-mon-oct.jpg', area:'puchong', en:['Puchong · Bandar Puteri','Mon 9:30–11:00 AM','Ann Soh & Wendy Loh'], zh:['蒲种 · Bandar Puteri','星期一 早上 9:30–11:00','猫妹 Ann Soh & 猫姐 Wendy Loh']},
+    {img:'intake-puchong-putra-prima-thu.jpg', area:'puchong', en:['Puchong · Putra Prima','Thu 7:00–8:30 PM','Wiwien Loh & Ann Soh'], zh:['蒲种 · Putra Prima','星期四 晚上 7:00–8:30','Wiwien Loh & Ann Soh']},
+    {img:'intake-kajang-thu.jpg', area:'kajang', en:['Kajang · Hokkien Association','Thu 9:00 AM','Teacher Jane Tang'], zh:['加影 · 福建会馆','星期四 早上 9:00','Jane Tang 老师']},
+    {img:'intake-oug-sat.jpg', area:'oug', en:['OUG · Dewan Komuniti','Sat 9:00 AM–12:00 PM','Wendy Loh & Rowena Hu'], zh:['OUG · 华联会所','星期六 早上 9:00–12:00','Wendy Loh & Rowena Hu']}
+  ];
+  var AREAS=[['all','All','全部'],['sk','Seri Kembangan','Seri Kembangan'],['cheras','Cheras','蕉赖'],['puchong','Puchong','蒲种'],['kajang','Kajang','加影'],['oug','OUG','OUG']];
+  var st={lang:'en',screen:'admin',area:'all'};
+  try{ st.lang = localStorage.getItem('kld_lang')==='zh' ? 'zh' : 'en'; var sc = localStorage.getItem('kld_screen'); st.screen = ['student','classes','intake'].indexOf(sc)>=0 ? sc : 'admin'; }catch(e){}
+
+  function renderIntake(){
+    var a=document.getElementById('areas'); a.innerHTML='';
+    AREAS.forEach(function(x){
+      var b=document.createElement('button'); b.type='button';
+      b.textContent = st.lang==='zh'?x[2]:x[1];
+      b.setAttribute('aria-pressed', st.area===x[0]);
+      b.addEventListener('click',function(){ st.area=x[0]; renderIntake(); });
+      a.appendChild(b);
+    });
+    var c=document.getElementById('cards'); c.innerHTML='';
+    CLASSES.filter(function(k){ return st.area==='all'||k.area===st.area; }).forEach(function(k){
+      var t=k[st.lang];
+      var d=document.createElement('div'); d.className='card';
+      d.innerHTML='<a href="'+k.img+'" target="_blank" rel="noopener"><img loading="lazy" src="'+k.img+'" alt=""><span class="new">NEW</span></a>'+
+        '<div class="info"><span class="area"></span><span class="when"></span><span class="who"></span></div>';
+      d.querySelector('img').alt=t[0];
+      d.querySelector('.area').textContent=t[0];
+      d.querySelector('.when').textContent=t[1];
+      d.querySelector('.who').textContent=t[2];
+      c.appendChild(d);
+    });
+  }
+  function render(){
+    document.documentElement.lang = st.lang;
+    var isIntake = st.screen==='intake';
+    var shot=document.getElementById('shot');
+    shot.hidden = isIntake;
+    document.getElementById('intake').hidden = !isIntake;
+    document.getElementById('foot').hidden = isIntake;
+    if(!isIntake) shot.src = st.screen + '-' + st.lang + '.jpg'; else renderIntake();
+    document.querySelectorAll('[data-en]').forEach(function(e){ e.textContent = e.getAttribute('data-' + st.lang); });
+    document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
+    document.querySelectorAll('[data-screen]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.screen===st.screen); });
+    try{ localStorage.setItem('kld_lang',st.lang); localStorage.setItem('kld_screen',st.screen); }catch(e){}
+  }
+  document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click', function(){ st.lang=b.dataset.lang; render(); }); });
+  document.querySelectorAll('[data-screen]').forEach(function(b){ b.addEventListener('click', function(){ st.screen=b.dataset.screen; render(); }); });
+  render();
+})();
+</script>
+</body>
+</html>
