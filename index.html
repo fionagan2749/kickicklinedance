@@ -121,22 +121,15 @@ section{margin-top:22px}
 .ticket .side{width:42%;position:relative;display:flex;align-items:flex-end;justify-content:flex-end;padding:10px;background-size:cover;background-position:center}
 .ticket .save{position:absolute;left:-6px;top:12px;background:#E5283C;color:#fff;font-weight:800;font-size:12.5px;border-radius:12px;padding:6px 8px;text-align:center;line-height:1.1;transform:rotate(-6deg)}
 
-/* products (layout follows the TikBeli Reward "Hot Selling" block) */
-.ptitle{display:inline-block;padding:7px 16px;font-size:14px;font-weight:800;letter-spacing:3px}
-.psub{font-size:13px;font-weight:600;color:var(--muted);margin-top:8px}
-.ptabs{display:flex;align-items:center;gap:16px;padding:12px 0;overflow-x:auto;scrollbar-width:none}
-.ptabs::-webkit-scrollbar{display:none}
-.ptabs button{border:0;background:transparent;padding:4px 0;font-weight:700;font-size:14px;color:var(--muted);white-space:nowrap;border-bottom:2.5px solid transparent}
-.ptabs button[aria-pressed="true"]{color:var(--ink);border-image:var(--cta) 1;border-bottom-width:2.5px;border-bottom-style:solid}
-.ptabs a{margin-left:auto;font-size:13px;font-weight:800;text-decoration:none;white-space:nowrap}
-.pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.pcard{display:block;border-radius:16px;overflow:hidden;text-decoration:none}
-.pcard img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
-.pcard .pi{padding:9px 11px 12px}
-.pcard .pn{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pcard .pp{display:flex;align-items:baseline;gap:6px;margin-top:4px}
-.pcard .pp b{font-size:15px;font-weight:800;color:#E0327F;font-variant-numeric:tabular-nums}
-.pcard .pp s{font-size:12px;font-weight:600;color:#A79FBE}
+/* shop: a quiet side link, classes stay the main business */
+.shop{display:flex;align-items:center;gap:12px;margin-top:18px;padding:10px 14px 10px 10px;text-decoration:none;border-radius:20px}
+.shop-thumbs{display:flex;flex-shrink:0}
+.shop-thumbs img{width:40px;height:40px;border-radius:12px;object-fit:cover;border:2px solid #fff;margin-left:-10px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.shop-thumbs img:first-child{margin-left:0}
+.shop-txt{flex:1;min-width:0;display:flex;flex-direction:column}
+.shop-txt b{font-size:15px}
+.shop-txt small{font-size:12.5px;color:var(--muted)}
+.shop-go{font-size:24px;color:var(--muted);line-height:1}
 
 /* teachers */
 .teacher{width:132px;overflow:hidden;text-align:center;text-decoration:none}
@@ -223,13 +216,6 @@ nav.tabbar .qr span{color:var(--ink)}
     </div>
   </section>
 
-  <section id="products">
-    <div class="ptitle glass-pill" data-t="prodTitle"></div>
-    <div class="psub" data-t="prodSub"></div>
-    <div class="ptabs" id="ptabs" role="group" aria-label="Product category"></div>
-    <div class="pgrid" id="pgrid"></div>
-  </section>
-
   <section id="teachers">
     <div class="sec-head"><h2 data-t="teacherTitle"></h2></div>
     <div class="rail" id="teacherRail"></div>
@@ -242,6 +228,12 @@ nav.tabbar .qr span{color:var(--ink)}
       <p><b data-t="groupName"></b><span data-t="groupSub"></span></p>
     </div>
   </section>
+
+  <a class="shop glass" href="products.html">
+    <span class="shop-thumbs"><img src="p-tee.jpg" alt=""><img src="p-bottle.jpg" alt=""><img src="p-shoes.jpg" alt=""></span>
+    <span class="shop-txt"><b data-t="shopTitle"></b><small data-t="shopSub"></small></span>
+    <span class="shop-go" aria-hidden="true">›</span>
+  </a>
 
   <p class="foot"><span data-t="sample"></span> · <a href="designs.html" data-t="designs"></a></p>
 </div>
@@ -262,7 +254,7 @@ nav.tabbar .qr span{color:var(--ink)}
       invite:'Invite friends, get FREE classes',inviteBtn:'Invite',actTitle:'Upcoming Activities',seeAll:'See all →',member:'Member Privilege',
       soldOut:'SOLD OUT',ev1:'Nasi Lemak Square Dance Workshop Day 3.0',ev1d:'Sun 13 Sep 2026 · 11 AM–3 PM',ev1v:'KL Wellness City, Bukit Jalil · RM28 · Wendy Loh & Melvin Tan',
       act1:'October Performance',act1d:'12 Oct 2026',act2:'Monthly Gathering',act2d:'26 Oct 2026',
-      intakeTitle:'New Intake',all:'All',join:'Join',ticketTitle:'Event Tickets',ticket1:'Year-End Gala Night',ticket1d:'Limited seats',prodTitle:'HOT SELLING PRODUCTS',prodSub:'Shop KICKICK dance gear now!',shopAll:'Shop All ›',catAll:'All',catShoes:'Shoes',catWear:'Apparel',catAcc:'Accessories',save:'Save 38%',book:'Book Now ›',
+      intakeTitle:'New Intake',all:'All',join:'Join',ticketTitle:'Event Tickets',ticket1:'Year-End Gala Night',ticket1d:'Limited seats',shopTitle:'KICKICK Shop',shopSub:'Dancewear, health & beauty and more',save:'Save 38%',book:'Book Now ›',
       teacherTitle:'Our Teachers',groupTitle:'Our Group',groupName:'KICKICK Line Dance',groupSub:'猫姐广场舞 · 猫哥广场舞 — 20+ years of dancing together',
       sample:'Activities & tickets are sample content',designs:'Design previews',
       navHome:'Home',navClasses:'Classes',navQR:'My QR',navCart:'Cart',navMe:'Me',soon:'Coming soon'},
@@ -270,7 +262,7 @@ nav.tabbar .qr span{color:var(--ink)}
       invite:'邀请朋友，免费上课',inviteBtn:'立即邀请',actTitle:'近期活动',seeAll:'查看全部 →',member:'会员专享',
       soldOut:'售罄',ev1:'辣死你妈 3.0 · 广场舞体验日',ev1d:'2026年9月13日 星期日 · 上午11点–下午3点',ev1v:'KL Wellness City, Bukit Jalil · RM28 · Wendy Loh & 猫哥 Melvin Tan',
       act1:'十月表演',act1d:'2026年10月12日',act2:'每月聚会',act2d:'2026年10月26日',
-      intakeTitle:'新班招生',all:'全部',join:'报名',ticketTitle:'活动门票',ticket1:'年终晚会',ticket1d:'名额有限',prodTitle:'热卖商品',prodSub:'立即选购 KICKICK 舞蹈用品！',shopAll:'全部商品 ›',catAll:'全部',catShoes:'舞鞋',catWear:'服装',catAcc:'配件',save:'省 38%',book:'立即订票 ›',
+      intakeTitle:'新班招生',all:'全部',join:'报名',ticketTitle:'活动门票',ticket1:'年终晚会',ticket1d:'名额有限',shopTitle:'KICKICK 商店',shopSub:'舞蹈服装、美容保健等精选好物',save:'省 38%',book:'立即订票 ›',
       teacherTitle:'我们的老师',groupTitle:'我们的团队',groupName:'KICKICK Line Dance',groupSub:'猫姐广场舞 · 猫哥广场舞 —— 20 多年一起跳舞',
       sample:'活动与门票为示范内容',designs:'设计稿预览',
       navHome:'首页',navClasses:'课程',navQR:'我的 QR',navCart:'购物车',navMe:'我的',soon:'即将推出'}
@@ -316,32 +308,6 @@ nav.tabbar .qr span{color:var(--ink)}
     });
     r.scrollLeft=0;
   }
-  // Sample products until the real catalogue arrives (photos generated in ChatGPT)
-  var PRODUCTS=[
-    {img:'p-shoes.jpg',cat:'shoes',price:'RM129',was:'RM159',en:'KICKICK Line Dance Sneakers',zh:'KICKICK 排舞软底鞋'},
-    {img:'p-tee.jpg',cat:'wear',price:'RM45',was:'RM59',en:'KICKICK Team T-Shirt',zh:'KICKICK 团队 T 恤'},
-    {img:'p-jacket.jpg',cat:'wear',price:'RM89',was:'RM120',en:'Performance Jacket',zh:'表演外套'},
-    {img:'p-hat.jpg',cat:'acc',price:'RM39',was:'RM49',en:'Line Dance Cowboy Hat',zh:'排舞牛仔帽'},
-    {img:'p-skirt.jpg',cat:'wear',price:'RM59',was:'RM79',en:'Flow Dance Skirt',zh:'舞蹈飘逸长裙'},
-    {img:'p-bottle.jpg',cat:'acc',price:'RM29',was:'RM35',en:'KICKICK Water Bottle',zh:'KICKICK 保温水瓶'}
-  ];
-  st.pcat='all';
-  function renderProducts(){
-    var t=T[st.lang], tabs=document.getElementById('ptabs'); tabs.innerHTML='';
-    [['all',t.catAll],['shoes',t.catShoes],['wear',t.catWear],['acc',t.catAcc]].forEach(function(x){
-      var b=el('button',null,x[1]); b.type='button'; b.setAttribute('aria-pressed',st.pcat===x[0]);
-      b.onclick=function(){ st.pcat=x[0]; renderProducts(); }; tabs.appendChild(b);
-    });
-    var all=el('a',null,t.shopAll); all.href='products.html'; tabs.appendChild(all);
-    var g=document.getElementById('pgrid'); g.innerHTML='';
-    PRODUCTS.filter(function(p){ return st.pcat==='all'||p.cat===st.pcat; }).slice(0,4).forEach(function(p){
-      var a=el('a','pcard glass'); a.href='products.html#'+p.img.replace(/\.jpg$/,'');
-      var im=el('img'); im.src=p.img; im.alt=p[st.lang]; im.loading='lazy'; a.appendChild(im);
-      var i=el('div','pi'); i.appendChild(el('div','pn',p[st.lang]));
-      var pr=el('div','pp'); pr.appendChild(el('b',null,p.price)); pr.appendChild(el('s',null,p.was)); i.appendChild(pr);
-      a.appendChild(i); g.appendChild(a);
-    });
-  }
   function renderTeachers(){
     var r=document.getElementById('teacherRail'); r.innerHTML='';
     TEACHERS.forEach(function(p){
@@ -353,7 +319,7 @@ nav.tabbar .qr span{color:var(--ink)}
     var t=T[st.lang]; document.documentElement.lang=st.lang==='zh'?'zh':'en';
     document.querySelectorAll('[data-t]').forEach(function(e){ e.textContent=t[e.getAttribute('data-t')]; });
     document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
-    renderIntake(); renderProducts(); renderTeachers();
+    renderIntake(); renderTeachers();
     try{ localStorage.setItem('kld_lang',st.lang); }catch(e){}
   }
   var tt; function soon(e){ if(e) e.preventDefault(); var x=document.getElementById('toast'); x.textContent=T[st.lang].soon; x.hidden=false; clearTimeout(tt); tt=setTimeout(function(){x.hidden=true;},1600); }

@@ -61,6 +61,7 @@ header::before{content:"";position:absolute;inset:0 -16px;z-index:-1;background:
 .pcard .pp s{font-size:12px;font-weight:600;color:#A79FBE}
 .pcard .cta{margin-top:auto}
 .pcard:target{outline:2.5px solid #FF4F8B;outline-offset:2px}
+.empty{grid-column:1/-1;margin:0;padding:22px;text-align:center;color:var(--muted);font-weight:600}
 .note{font-size:12.5px;color:var(--muted);margin:16px 0 0;text-align:center}
 
 nav.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(448px,calc(100% - 24px));display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:6px 6px 8px;z-index:30;border-radius:24px}
@@ -102,18 +103,18 @@ nav.tabbar .qr span{color:var(--ink)}
 <script>
 (function(){
   var T={
-    en:{prodTitle:'HOT SELLING PRODUCTS',prodSub:'Shop KICKICK dance gear now!',catAll:'All',catShoes:'Shoes',catWear:'Apparel',catAcc:'Accessories',order:'WhatsApp to order',note:'Sample products — real items and prices coming soon.',navHome:'Home',navClasses:'Classes',navQR:'My QR',navCart:'Cart',navMe:'Me',soon:'Coming soon'},
-    zh:{prodTitle:'热卖商品',prodSub:'立即选购 KICKICK 舞蹈用品！',catAll:'全部',catShoes:'舞鞋',catWear:'服装',catAcc:'配件',order:'WhatsApp 下单',note:'示范商品，真实商品与价格即将上架。',navHome:'首页',navClasses:'课程',navQR:'我的 QR',navCart:'购物车',navMe:'我的',soon:'即将推出'}
+    en:{prodTitle:'KICKICK SHOP',prodSub:'Hand-picked products for our dance family — dancewear, health & beauty and more',catAll:'All',catDance:'Dancewear',catBeauty:'Health & Beauty',catLife:'Lifestyle',empty:'New products coming soon.',order:'WhatsApp to order',note:'Sample products — real items and prices coming soon.',navHome:'Home',navClasses:'Classes',navQR:'My QR',navCart:'Cart',navMe:'Me',soon:'Coming soon'},
+    zh:{prodTitle:'KICKICK 商店',prodSub:'为舞蹈大家庭精选的好物：舞蹈服装、美容保健等',catAll:'全部',catDance:'舞蹈服装',catBeauty:'美容保健',catLife:'生活用品',empty:'新商品即将上架。',order:'WhatsApp 下单',note:'示范商品，真实商品与价格即将上架。',navHome:'首页',navClasses:'课程',navQR:'我的 QR',navCart:'购物车',navMe:'我的',soon:'即将推出'}
   };
-  // Sample products until the real catalogue arrives (photos generated in ChatGPT). Orders go to Wendy on WhatsApp.
+  // Any kind of product can go here (dancewear, skincare, health, lifestyle). Sample products until the real catalogue arrives (photos generated in ChatGPT). Orders go to Wendy on WhatsApp.
   var WA='60123333332';
   var PRODUCTS=[
-    {id:'p-shoes',cat:'shoes',price:'RM129',was:'RM159',en:'KICKICK Line Dance Sneakers',zh:'KICKICK 排舞软底鞋'},
-    {id:'p-tee',cat:'wear',price:'RM45',was:'RM59',en:'KICKICK Team T-Shirt',zh:'KICKICK 团队 T 恤'},
-    {id:'p-jacket',cat:'wear',price:'RM89',was:'RM120',en:'Performance Jacket',zh:'表演外套'},
-    {id:'p-hat',cat:'acc',price:'RM39',was:'RM49',en:'Line Dance Cowboy Hat',zh:'排舞牛仔帽'},
-    {id:'p-skirt',cat:'wear',price:'RM59',was:'RM79',en:'Flow Dance Skirt',zh:'舞蹈飘逸长裙'},
-    {id:'p-bottle',cat:'acc',price:'RM29',was:'RM35',en:'KICKICK Water Bottle',zh:'KICKICK 保温水瓶'}
+    {id:'p-shoes',cat:'dance',price:'RM129',was:'RM159',en:'KICKICK Line Dance Sneakers',zh:'KICKICK 排舞软底鞋'},
+    {id:'p-tee',cat:'dance',price:'RM45',was:'RM59',en:'KICKICK Team T-Shirt',zh:'KICKICK 团队 T 恤'},
+    {id:'p-jacket',cat:'dance',price:'RM89',was:'RM120',en:'Performance Jacket',zh:'表演外套'},
+    {id:'p-hat',cat:'dance',price:'RM39',was:'RM49',en:'Line Dance Cowboy Hat',zh:'排舞牛仔帽'},
+    {id:'p-skirt',cat:'dance',price:'RM59',was:'RM79',en:'Flow Dance Skirt',zh:'舞蹈飘逸长裙'},
+    {id:'p-bottle',cat:'life',price:'RM29',was:'RM35',en:'KICKICK Water Bottle',zh:'KICKICK 保温水瓶'}
   ];
   var st={lang:'en',cat:'all'};
   try{ if(localStorage.getItem('kld_lang')==='zh') st.lang='zh'; }catch(e){}
@@ -123,12 +124,14 @@ nav.tabbar .qr span{color:var(--ink)}
     document.querySelectorAll('[data-t]').forEach(function(e){ e.textContent=t[e.getAttribute('data-t')]; });
     document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
     var tabs=document.getElementById('ptabs'); tabs.innerHTML='';
-    [['all',t.catAll],['shoes',t.catShoes],['wear',t.catWear],['acc',t.catAcc]].forEach(function(x){
+    [['all',t.catAll],['dance',t.catDance],['beauty',t.catBeauty],['life',t.catLife]].forEach(function(x){
       var b=el('button',null,x[1]); b.type='button'; b.setAttribute('aria-pressed',st.cat===x[0]);
       b.onclick=function(){ st.cat=x[0]; renderAll(); }; tabs.appendChild(b);
     });
     var g=document.getElementById('pgrid'); g.innerHTML='';
-    PRODUCTS.filter(function(p){ return st.cat==='all'||p.cat===st.cat; }).forEach(function(p){
+    var list=PRODUCTS.filter(function(p){ return st.cat==='all'||p.cat===st.cat; });
+    if(!list.length){ var e=el('p','empty glass',t.empty); g.appendChild(e); }
+    list.forEach(function(p){
       var c=el('div','pcard glass'); c.id=p.id;
       var im=el('img'); im.src=p.id+'.jpg'; im.alt=p[st.lang]; im.loading='lazy'; c.appendChild(im);
       var i=el('div','pi'); i.appendChild(el('div','pn',p[st.lang]));
