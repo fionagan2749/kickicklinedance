@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign up · KickickLineDance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kld-admin.css">
+<!-- Layout: public sign-up form (replaces Google Form). Event card → name / phone / area / tickets / note → thank-you.
+     Writes straight into Wendy's student list; a returning student (same phone + same name) is matched, not duplicated. -->
+<style>
+.app{max-width:560px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{width:46px;height:46px;border-radius:15px}
+.ev{padding:18px;color:#fff;border-radius:26px;border:1.3px solid transparent;
+  background:linear-gradient(135deg,rgba(255,138,61,.94),rgba(255,79,139,.92) 50%,rgba(166,60,240,.92)) padding-box,var(--rim) border-box;box-shadow:0 18px 40px -18px rgba(166,60,240,.55)}
+.ev h1{margin:0;font-size:22px;line-height:1.25}
+.ev p{margin:6px 0 0;font-weight:600;opacity:.95}
+.ev .price{display:inline-block;margin-top:10px;background:rgba(255,255,255,.22);border-radius:999px;padding:5px 12px;font-weight:800}
+form{padding:16px;display:flex;flex-direction:column;gap:12px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:44px;height:44px;border-radius:14px;border:1.3px solid rgba(30,27,75,.14);background:#fff;font-size:22px;font-weight:800}
+.stepper output{min-width:34px;text-align:center;font-size:22px;font-weight:800}
+.done{padding:26px 18px;text-align:center}
+.done .ok{width:64px;height:64px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;background:var(--goodbg);color:var(--good)}
+.done .ok svg{width:34px;height:34px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a class="brand" href="./" style="text-decoration:none;flex:1"><img src="app-logo.png" alt=""><b style="font-size:17px">KickickLineDance</b></a>
+    <div class="lang glass-pill" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </header>
+  <main id="main"><div class="empty">…</div></main>
+</div>
+<script>
+(function(){
+  var API='https://ouhvglgfekdiejnjqxbc.supabase.co/rest/v1/';
+  var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91aHZnbGdmZWtkaWVqbmpxeGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODM4NzEsImV4cCI6MjEwODg1OTg3MX0.reiTSKw9DkvY_RWAaUmoae-RBruF8_wW7oz64LPgm6Q';
+  var H={apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'};
+  var T={
+    pick:['Choose an event','选择活动'], none:['No event is open for sign-up right now. Follow us for the next one!','目前没有开放报名的活动，请留意下一场！'],
+    closed:['Sign-up for this event is closed.','这个活动已截止报名。'],
+    name:['Your name','你的名字'], phone:['WhatsApp number','WhatsApp 号码'], area:['Your area','你住的地区'], tix:['How many tickets?','几张票？'],
+    note:['Friends coming with you / anything else','同行朋友名字 / 其他留言'], noteHint:['e.g. names of friends you are booking for','例如：帮朋友订票，请写朋友名字'],
+    send:['Sign me up','我要报名'], sending:['Sending…','提交中…'],
+    thanks:['You are on the list!','报名成功！'], thanks2:['Wendy will WhatsApp you to confirm and arrange payment.','Wendy 会 WhatsApp 你确认并安排付款。'],
+    again:['Sign up another person','帮另一个人报名'], home:['Back to home','回首页'],
+    err:['Could not send. Please check your number and try again.','提交失败，请检查号码再试。'], per:['per person','每人']
+  };
+  var lang='en'; try{ if(localStorage.getItem('kld_lang')==='zh') lang='zh'; }catch(e){}
+  function t(k){ return T[k][lang==='zh'?1:0]; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  var code=new URLSearchParams(location.search).get('e'), EVS=null, sent=false, n=1, main=document.getElementById('main');
+
+  fetch(API+'events?select=code,name_en,name_zh,event_date,start_time,venue,price&order=event_date',{headers:H})
+    .then(function(r){ return r.json(); }).then(function(d){ EVS=Array.isArray(d)?d:[]; draw(); }).catch(function(){ EVS=[]; draw(); });
+
+  function nm(e){ return lang==='zh'&&e.name_zh?e.name_zh:e.name_en; }
+  function when(e){ if(!e.event_date) return ''; return new Date(e.event_date+'T00:00:00').toLocaleDateString(lang==='zh'?'zh-CN':'en-MY',{weekday:'short',day:'numeric',month:'long',year:'numeric'}); }
+  function draw(){
+    document.documentElement.lang=lang==='zh'?'zh-Hans':'en';
+    document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed',b.dataset.lang===lang); });
+    if(!EVS) return;
+    var ev=EVS.find(function(e){ return e.code===code; });
+    if(!ev){
+      main.innerHTML = code ? '<div class="empty glass">'+t('closed')+'</div>' : (EVS.length ? '<h2 style="font-size:18px">'+t('pick')+'</h2><div class="list">'+EVS.map(function(e){ return '<a class="row glass" style="text-decoration:none" href="?e='+encodeURIComponent(e.code)+'"><span class="main"><span class="nm">'+esc(nm(e))+'</span><span class="sub">'+esc(when(e))+' · '+esc(e.venue||'')+'</span></span></a>'; }).join('')+'</div>' : '<div class="empty glass">'+t('none')+'</div>');
+      return;
+    }
+    var card='<div class="ev"><h1>'+esc(nm(ev))+'</h1><p>'+esc(when(ev))+(ev.start_time?' · '+esc(ev.start_time):'')+'</p><p>'+esc(ev.venue||'')+'</p>'+(ev.price?'<span class="price">RM'+(+ev.price)+' '+t('per')+'</span>':'')+'</div>';
+    if(sent){
+      main.innerHTML=card+'<section class="done glass"><div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><h2 style="margin:0 0 6px">'+t('thanks')+'</h2><p class="muted" style="margin:0 0 14px;font-weight:600">'+t('thanks2')+'</p><button class="btn soft" id="ag" type="button">'+t('again')+'</button> <a class="btn ghost" href="./">'+t('home')+'</a></section>';
+      document.getElementById('ag').addEventListener('click',function(){ sent=false; n=1; draw(); });
+      return;
+    }
+    main.innerHTML=card+'<section><form class="glass" id="f" novalidate>'+
+      '<label class="field"><span>'+t('name')+'</span><input class="inp" name="name" required autocomplete="name"></label>'+
+      '<label class="field"><span>'+t('phone')+'</span><input class="inp" name="phone" required inputmode="tel" autocomplete="tel" placeholder="012-345 6789"></label>'+
+      '<label class="field"><span>'+t('area')+'</span><input class="inp" name="area" list="areas" placeholder="Puchong, Cheras, OUG…"><datalist id="areas"><option>Puchong</option><option>Cheras</option><option>OUG</option><option>Kajang</option><option>Seri Kembangan</option><option>Bukit Jalil</option><option>Ampang</option><option>Klang</option></datalist></label>'+
+      '<div class="field"><span>'+t('tix')+'</span><div class="stepper"><button type="button" data-d="-1" aria-label="Less">−</button><output id="n">'+n+'</output><button type="button" data-d="1" aria-label="More">+</button>'+(ev.price?'<b style="margin-left:auto;color:var(--ink)">RM'+(ev.price*n)+'</b>':'')+'</div></div>'+
+      '<label class="field"><span>'+t('note')+'</span><textarea class="inp" name="notes" placeholder="'+t('noteHint')+'"></textarea></label>'+
+      '<p id="er" class="small" style="color:var(--bad);font-weight:700;margin:0" hidden></p>'+
+      '<button class="btn cta" style="justify-content:center;padding:14px">'+t('send')+'</button></form></section>';
+    var f=document.getElementById('f');
+    f.querySelectorAll('[data-d]').forEach(function(b){ b.addEventListener('click',function(){ var keep={name:f.name.value,phone:f.phone.value,area:f.area.value,notes:f.notes.value}; n=Math.min(20,Math.max(1,n+(+b.dataset.d))); draw(); var g=document.getElementById('f'); Object.keys(keep).forEach(function(k){ g.elements[k].value=keep[k]; }); }); });
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      var er=document.getElementById('er'), digits=f.phone.value.replace(/\D/g,'');
+      if(!f.name.value.trim()||digits.length<9){ er.textContent=t('err'); er.hidden=false; return; }
+      var b=f.querySelector('.cta'); b.disabled=true; b.textContent=t('sending');
+      fetch(API+'rpc/public_register',{method:'POST',headers:H,body:JSON.stringify({p_event_code:ev.code,p_name:f.name.value.trim(),p_phone:f.phone.value,p_area:f.area.value.trim(),p_tickets:n,p_notes:f.notes.value.trim()})})
+        .then(function(r){ if(!r.ok) throw 0; sent=true; draw(); window.scrollTo(0,0); })
+        .catch(function(){ b.disabled=false; b.textContent=t('send'); er.textContent=t('err'); er.hidden=false; });
+    });
+  }
+  document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click',function(){
+    lang=b.dataset.lang; try{ localStorage.setItem('kld_lang',lang); }catch(e){}
+    var f=document.getElementById('f'), keep=f?{name:f.name.value,phone:f.phone.value,area:f.area.value,notes:f.notes.value}:null;
+    draw(); var g=document.getElementById('f'); if(keep&&g) Object.keys(keep).forEach(function(k){ g.elements[k].value=keep[k]; });
+  }); });
+})();
+</script>
+</body>
+</html>

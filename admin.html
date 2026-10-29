@@ -253,7 +253,7 @@ section{margin-top:20px}
     });
 
     var Q=document.getElementById('qa'); Q.innerHTML='';
-    [['qr','blue',null],['plus','green',null],['cash','amber',null],['mega','pink',null],['cal','violet','classes.html'],['chart','peach','events.html'],['bag','pink','products.html'],['tag','green',null]].forEach(function(q,i){
+    [['qr','blue',null],['plus','green','students.html'],['cash','amber',null],['mega','pink',null],['cal','violet','classes.html'],['chart','peach','events.html'],['bag','pink','products.html'],['tag','green',null]].forEach(function(q,i){
       var a=q[2]?el('a'):el('button'); if(q[2]) a.href=q[2]; else { a.type='button'; a.addEventListener('click',soon); }
       var tile=el('span','tile glass'); tile.innerHTML=ICONS[q[0]]; tile.style.color=TINT[q[1]][1];
       tile.style.background='linear-gradient(165deg,'+TINT[q[1]][0]+',rgba(255,255,255,.7)) padding-box, var(--rim) border-box';

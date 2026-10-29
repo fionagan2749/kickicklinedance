@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Events · KickickLineDance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kld-admin.css">
+<!-- Layout: no ?id = list of events (+ new event). With ?id = one event: numbers on top, then tabs
+     Guests (paid / check-in / table) · Tables (seating, auto-arrange) · Flow · MC script · Performances · Settings (form link). -->
+<style>
+.evcard{display:flex;gap:14px;align-items:center;padding:14px 16px;text-decoration:none}
+.evcard .dt{width:56px;flex-shrink:0;text-align:center;border-radius:16px;padding:6px 0;background:var(--cta);color:#fff;line-height:1.1}
+.evcard .dt b{display:block;font-size:22px}
+.evcard .dt small{font-size:11.5px;font-weight:700;text-transform:uppercase}
+.grow{display:flex;align-items:center;gap:10px;padding:10px 12px;flex-wrap:wrap}
+.grow .main{flex:1;min-width:160px}
+.grow select{border:1.3px solid rgba(30,27,75,.14);background:#fff;border-radius:999px;padding:5px 8px;font-size:12.5px;font-weight:800;max-width:120px}
+.back{display:inline-flex;align-items:center;gap:4px;text-decoration:none;font-weight:800;font-size:13px;color:var(--accent)}
+.back svg{width:16px;height:16px}
+.linkbox{display:flex;gap:8px;align-items:center;padding:10px 12px;font-size:13.5px;font-weight:700;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="who"><small id="kick"></small><b id="ttl"></b></div>
+    <div class="lang glass-pill" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </header>
+  <div id="me"></div>
+  <main id="main"></main>
+</div>
+<div class="sheet-back" id="back" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
+
+<script>if(location.hostname==='localhost'&&/mock/.test(location.search))document.write('<script src="kld-mock.js"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="kld-db.js"></script>
+<script>
+(function(){
+  var K=KLD, sb=K.sb, esc=K.esc, ic=K.icon;
+  var T={
+    events:['Events & workshops','活动与体验日'], all:['All events','全部活动'], newEv:['New event','新增活动'],
+    guests:['Guests','嘉宾名单'], tables:['Tables','桌位安排'], flow:['Event flow','活动流程'], script:['MC script','司仪稿'], perf:['Performances','表演节目'], settings:['Settings','设置'],
+    tix:['tickets','张票'], people:['names','人名'], paid:['Paid','已付'], inn:['Checked in','已签到'], seated:['Seated','已安排座位'],
+    search:['Search guest','搜嘉宾'], f_all:['All','全部'], f_unpaid:['Not paid','未付'], f_out:['Not checked in','未签到'], f_notable:['No table','没座位'],
+    table:['Table','桌'], noTable:['No table','未安排'], add:['Add guest','加嘉宾'], by:['by','订票人'],
+    addTable:['Add table','加一桌'], label:['Table name','桌名'], seats:['Seats','座位'], auto:['Auto-arrange','自动安排'],
+    autoQ:['Seat everyone without a table? Friends booked together stay at the same table.','帮没座位的人自动安排？一起订票的朋友会坐同一桌。'],
+    autoDone:['%n guests seated','已安排 %n 人'], unseated:['%n tickets still without a table','还有 %n 张票没座位'], full:['Not enough seats. Add more tables.','座位不够，请加桌。'],
+    delTable:['Delete this table? Guests go back to "No table".','删除这桌？嘉宾会变回未安排。'],
+    addRow:['Add a line','加一行'], saved:['Saved','已保存'], err:['Something went wrong. Try again.','出错了，请再试。'], delQ:['Delete this line?','删除这一行？'],
+    f_time:['Time','时间'], f_item:['What happens','内容'], f_owner:['Who','负责人'], f_notes:['Notes','备注'],
+    f_section:['Part','环节'], f_speaker:['Speaker','讲者'], f_body:['Lines','台词'],
+    f_title:['Item','节目'], f_team:['Team','队伍'], f_song:['Song','歌曲'], f_members:['Dancers','舞者'], f_min:['Minutes','分钟'],
+    print:['Print run sheet','打印流程表'],
+    s_code:['Short code','代号'], s_en:['Name (English)','名称（英文）'], s_zh:['Name (中文)','名称（中文）'], s_date:['Date','日期'], s_time:['Time','时间'], s_venue:['Venue','地点'], s_price:['Price (RM)','票价 (RM)'], s_cap:['Capacity','名额'], s_notes:['Notes','备注'],
+    open:['Open the sign-up form','开放报名表格'], openTag:['Sign-up open','报名中'], openOn:['Sign-up form is OPEN. Share this link:','报名表格已开放，分享这个链接：'], openOff:['Sign-up form is closed.','报名表格已关闭。'],
+    copy:['Copy link','复制链接'], copied:['Link copied','已复制'], share:['Share on WhatsApp','WhatsApp 分享'], save:['Save','保存'],
+    create:['Create event','建立活动'], codeTaken:['That short code is used. Pick another.','代号已用过，换一个。'],
+    pick:['Find a student or type a new name','找学员或输入新名字'], newPerson:['New person:','新的人：'], tickets:['Tickets','票数'], phone:['Phone','电话'],
+    none:['No guests yet.','还没有嘉宾。'], empty:['Nothing here yet. Tap “Add a line”.','还没有内容，按「加一行」。'],
+    wl:["Wendy",'Wendy'], ml:["Melvin",'Melvin'], form:['Form','表格'], manual:['Hand','手动']
+  };
+  function t(k){ return (T[k]||[k,k])[K.lang()==='zh'?1:0]; }
+  var qs=new URLSearchParams(location.search), EID=+qs.get('id')||0;
+  var EV=null, REGS=[], TABLES=[], tab=qs.get('tab')||'guests', gv={q:'',f:'all'};
+  var main=document.getElementById('main');
+
+  K.gate(function(){ EID?loadEvent():loadList(); });
+  K.onLang(function(){ EID?(EV&&draw()):(LIST&&drawList()); });
+
+  /* ================= event list ================= */
+  var LIST=null;
+  function loadList(){
+    Promise.all([sb.from('events').select('*').order('event_date',{ascending:false}), sb.from('registrations').select('event_id,tickets')]).then(function(r){
+      var c={}; (r[1].data||[]).forEach(function(x){ c[x.event_id]=(c[x.event_id]||0)+(x.tickets||0); });
+      LIST=(r[0].data||[]).map(function(e){ e.tix=c[e.id]||0; return e; }); drawList();
+    });
+  }
+  function drawList(){
+    document.getElementById('kick').textContent=t('events'); document.getElementById('ttl').textContent=t('all');
+    main.innerHTML='<section class="sh"><span></span><button class="btn cta" id="ne" type="button">'+ic('plus')+t('newEv')+'</button></section><div class="list">'+
+      LIST.map(function(e){
+        var d=e.event_date?new Date(e.event_date+'T00:00:00'):null;
+        return '<a class="evcard glass" href="?id='+e.id+'"><span class="dt"><b>'+(d?d.getDate():'–')+'</b><small>'+(d?d.toLocaleDateString('en',{month:'short'}):'')+'</small></span><span class="main" style="flex:1;min-width:0"><span class="nm" style="font-weight:800;display:block">'+esc(K.pick(e.name_en,e.name_zh))+'</span><span class="muted small">'+esc(e.venue||'')+(e.event_date?' · '+d.getFullYear():'')+'</span></span><span class="end" style="text-align:right"><b style="font-size:20px">'+e.tix+'</b><br><span class="muted small">'+t('tix')+'</span>'+(e.open_for_registration?'<br><span class="tag good">'+t('openTag')+'</span>':'')+'</span></a>';
+      }).join('')+'</div>';
+    document.getElementById('ne').addEventListener('click',function(){ settingsSheet(null); });
+  }
+
+  /* ================= one event ================= */
+  function loadEvent(){
+    Promise.all([
+      sb.from('events').select('*').eq('id',EID).single(),
+      sb.from('registrations').select('*, contacts(id,name,phone,area)').eq('event_id',EID).order('id'),
+      sb.from('event_tables').select('*').eq('event_id',EID).order('id')
+    ]).then(function(r){
+      if(r[0].error){ main.innerHTML='<div class="empty glass">'+t('err')+'</div>'; return; }
+      EV=r[0].data; REGS=r[1].data||[]; TABLES=r[2].data||[]; draw();
+    });
+  }
+  function sum(a,f){ return a.reduce(function(s,x){ return s+(f(x)||0); },0); }
+  function draw(){
+    document.getElementById('kick').innerHTML='<a class="back" href="event.html">'+ic('back')+t('all')+'</a>';
+    document.getElementById('ttl').textContent=K.pick(EV.name_en,EV.name_zh);
+    var tix=sum(REGS,function(r){return r.tickets;});
+    var h='<section class="stats">'+
+      st(tix,t('tix')+(EV.capacity?' / '+EV.capacity:''))+st(sum(REGS,function(r){return r.paid?r.tickets:0;}),t('paid'))+
+      st(sum(REGS,function(r){return r.attended?r.tickets:0;}),t('inn'))+st(sum(REGS,function(r){return r.table_no?r.tickets:0;}),t('seated'))+'</section>'+
+      '<section><div class="tabs glass-pill" role="tablist">'+['guests','tables','flow','script','perf','settings'].map(function(k){ return '<button role="tab" type="button" data-tab="'+k+'" aria-selected="'+(tab===k)+'">'+t(k)+'</button>'; }).join('')+'</div></section><section id="pane"></section>';
+    main.innerHTML=h;
+    main.querySelectorAll('[data-tab]').forEach(function(b){ b.addEventListener('click',function(){ tab=b.dataset.tab; history.replaceState(null,'','?id='+EID+'&tab='+tab); draw(); }); });
+    ({guests:guests,tables:tables,flow:function(){ editor('event_flow'); },script:function(){ editor('event_script'); },perf:function(){ editor('event_performances'); },settings:settings})[tab]();
+  }
+  function st(v,l){ return '<div class="stat glass"><div class="v">'+v+'</div><div class="t">'+l+'</div></div>'; }
+  var pane=function(){ return document.getElementById('pane'); };
+  function srcShort(s){ return {wendy_list:t('wl'),melvin_list:t('ml'),form:t('form'),manual:t('manual')}[s]||s; }
+
+  /* ---------- guests ---------- */
+  function guests(){
+    var q=gv.q.toLowerCase();
+    var list=REGS.filter(function(r){
+      var c=r.contacts||{};
+      if(q && ((c.name||'')+' '+(c.phone||'')+' '+(r.booked_by||'')+' '+(c.area||'')+' '+(r.notes||'')).toLowerCase().indexOf(q.replace(/^0/,''))<0) return false;
+      if(gv.f==='unpaid') return !r.paid; if(gv.f==='out') return !r.attended; if(gv.f==='notable') return !r.table_no; return true;
+    });
+    var opts='<option value="">'+t('noTable')+'</option>'+TABLES.map(function(x){ return '<option>'+esc(x.label)+'</option>'; }).join('');
+    pane().innerHTML='<label class="search glass-pill">'+ic('search')+'<input id="gq" type="search" placeholder="'+t('search')+'" value="'+esc(gv.q)+'"></label>'+
+      '<div class="chips" style="margin-top:10px">'+['all','unpaid','out','notable'].map(function(f){ return '<button type="button" class="chip" data-gf="'+f+'" aria-pressed="'+(gv.f===f)+'">'+t('f_'+f)+'</button>'; }).join('')+'</div>'+
+      '<div class="sh"><div class="cnt">'+list.length+' / '+REGS.length+' '+t('people')+'</div><button class="btn soft" id="ga" type="button">'+ic('plus')+t('add')+'</button></div>'+
+      '<div class="list">'+(list.length?list.map(function(r){
+        var c=r.contacts||{name:'?'};
+        return '<div class="grow glass" data-r="'+r.id+'"><span class="av" style="width:36px;height:36px;font-size:14px;border-radius:12px">'+esc(K.initials(c.name))+'</span><span class="main"><b>'+esc(c.name)+'</b>'+(r.tickets>1?' <span class="tag live">×'+r.tickets+'</span>':'')+
+          '<br><span class="muted small">'+(c.phone?esc(K.showPhone(c.phone))+' · ':'')+(r.booked_by?t('by')+' '+esc(r.booked_by)+' · ':'')+srcShort(r.source)+(r.notes?' · '+esc(r.notes):'')+'</span></span>'+
+          '<button type="button" class="tg paid" data-k="paid" aria-pressed="'+!!r.paid+'">'+ic('check')+t('paid')+'</button>'+
+          '<button type="button" class="tg in" data-k="attended" aria-pressed="'+!!r.attended+'">'+ic('check')+t('inn')+'</button>'+
+          '<select aria-label="'+t('table')+'" data-k="table_no">'+opts.replace('<option>'+esc(r.table_no||'\u0000')+'<','<option selected>'+esc(r.table_no||'')+'<')+'</select></div>';
+      }).join(''):'<div class="empty glass">'+t('none')+'</div>')+'</div>';
+    var gq=document.getElementById('gq'); gq.addEventListener('input',function(){ gv.q=this.value.trim(); var p=this.selectionStart; guests(); var n=document.getElementById('gq'); n.focus(); n.setSelectionRange(p,p); });
+    pane().querySelectorAll('[data-gf]').forEach(function(b){ b.addEventListener('click',function(){ gv.f=b.dataset.gf; guests(); }); });
+    pane().querySelectorAll('[data-r]').forEach(function(row){
+      var r=REGS.find(function(x){ return x.id===+row.dataset.r; });
+      row.querySelectorAll('.tg').forEach(function(b){ b.addEventListener('click',function(){ var k=b.dataset.k, v=!r[k]; upd(r,k,v,function(){ b.setAttribute('aria-pressed',v); }); }); });
+      row.querySelector('select').addEventListener('change',function(){ upd(r,'table_no',this.value||null); });
+    });
+    document.getElementById('ga').addEventListener('click',addGuest);
+  }
+  function upd(r,k,v,ok){
+    var o={}; o[k]=v;
+    sb.from('registrations').update(o).eq('id',r.id).then(function(res){ if(res.error){ K.toast(t('err')); return; } r[k]=v; if(ok) ok(); refreshStats(); });
+  }
+  function refreshStats(){ var s=main.querySelector('.stats'); if(!s) return; var tix=sum(REGS,function(r){return r.tickets;});
+    s.innerHTML=st(tix,t('tix')+(EV.capacity?' / '+EV.capacity:''))+st(sum(REGS,function(r){return r.paid?r.tickets:0;}),t('paid'))+st(sum(REGS,function(r){return r.attended?r.tickets:0;}),t('inn'))+st(sum(REGS,function(r){return r.table_no?r.tickets:0;}),t('seated')); }
+
+  /* sheet helpers */
+  var sheet=document.getElementById('sheet'), back=document.getElementById('back');
+  function closeSheet(){ sheet.hidden=true; back.hidden=true; }
+  back.addEventListener('click',closeSheet);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeSheet(); });
+  function openSheet(title,body){ sheet.innerHTML='<div class="hd"><h3 style="flex:1">'+title+'</h3><button class="x" type="button" aria-label="Close">'+ic('x')+'</button></div>'+body; sheet.hidden=false; back.hidden=false; sheet.querySelector('.x').addEventListener('click',closeSheet); }
+
+  function addGuest(){
+    openSheet(t('add'),'<label class="search glass-pill">'+ic('search')+'<input id="aq" type="search" placeholder="'+t('pick')+'" autocomplete="off"></label><div class="list" id="ar" style="margin-top:10px"></div>'+
+      '<div class="grid2" style="margin-top:12px"><label class="field"><span>'+t('tickets')+'</span><input class="inp" id="at" type="number" min="1" max="50" value="1"></label><label class="field"><span>'+t('phone')+' ('+t('newPerson').replace(':','')+')</span><input class="inp" id="ap" inputmode="tel"></label></div>');
+    var aq=document.getElementById('aq'), ar=document.getElementById('ar'), timer; aq.focus();
+    aq.addEventListener('input',function(){ clearTimeout(timer); timer=setTimeout(find,250); });
+    function find(){
+      var q=aq.value.trim(); if(q.length<2){ ar.innerHTML=''; return; }
+      var d=q.replace(/\D/g,'').replace(/^60?/,'');
+      var qq=sb.from('contacts').select('id,name,phone,area').limit(8);
+      qq = d.length>=4 ? qq.like('phone','%'+d+'%') : qq.ilike('name','%'+q+'%');
+      qq.then(function(r){
+        ar.innerHTML=(r.data||[]).map(function(c){ return '<button type="button" class="row glass" data-c="'+c.id+'"><span class="main"><span class="nm">'+esc(c.name)+'</span><span class="sub">'+esc(K.showPhone(c.phone||''))+' '+esc(c.area||'')+'</span></span>'+ic('plus')+'</button>'; }).join('')+
+          (d.length>=4?'':'<button type="button" class="row glass" data-new="1"><span class="main"><span class="nm">'+t('newPerson')+' '+esc(q)+'</span></span>'+ic('plus')+'</button>');
+        ar.querySelectorAll('[data-c]').forEach(function(b){ b.addEventListener('click',function(){ reg(+b.dataset.c); }); });
+        var n=ar.querySelector('[data-new]'); if(n) n.addEventListener('click',function(){
+          sb.from('contacts').insert({name:q, phone:K.normPhone(document.getElementById('ap').value)}).select('id').single().then(function(r){ if(r.error){ K.toast(t('err')); return; } reg(r.data.id); });
+        });
+      });
+    }
+    function reg(cid){
+      var n=Math.max(1,+document.getElementById('at').value||1);
+      sb.from('registrations').insert({event_id:EID,contact_id:cid,source:'manual',tickets:n,amount:EV.price?EV.price*n:null}).then(function(r){ if(r.error){ K.toast(t('err')); return; } K.toast(t('saved')); closeSheet(); loadEvent(); });
+    }
+  }
+
+  /* ---------- tables ---------- */
+  function tables(){
+    var used={}; REGS.forEach(function(r){ if(r.table_no) (used[r.table_no]=used[r.table_no]||[]).push(r); });
+    var unseat=sum(REGS,function(r){ return r.table_no?0:r.tickets; });
+    pane().innerHTML='<form id="tf" class="glass" style="padding:12px;display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap"><label class="field" style="flex:1;min-width:120px"><span>'+t('label')+'</span><input class="inp" name="label" required value="'+(TABLES.length+1)+'"></label><label class="field" style="width:90px"><span>'+t('seats')+'</span><input class="inp" name="seats" type="number" min="1" value="10"></label><button class="btn cta">'+ic('plus')+t('addTable')+'</button></form>'+
+      '<div class="sh" style="margin-top:12px"><div class="cnt">'+(unseat?t('unseated').replace('%n',unseat):'')+'</div><span style="display:flex;gap:6px"><button class="btn soft" id="au" type="button"'+(TABLES.length&&unseat?'':' disabled')+'>'+t('auto')+'</button><button class="btn ghost" type="button" id="pr">'+t('print')+'</button></span></div>'+
+      '<div class="tbls">'+TABLES.map(function(x){
+        var g=used[x.label]||[], n=sum(g,function(r){return r.tickets;}), s=x.seats||10;
+        return '<div class="tbl glass"><div class="lb"><span>'+t('table')+' '+esc(x.label)+'</span><span class="muted small">'+n+' / '+s+' <button class="btn ghost" type="button" data-del="'+x.id+'" aria-label="Delete" style="padding:4px">'+ic('trash')+'</button></span></div><div class="bar"><i style="width:'+Math.min(100,n/s*100)+'%;'+(n>s?'background:var(--bad)':'')+'"></i></div><ul>'+
+          g.map(function(r){ return '<li>'+esc((r.contacts||{}).name)+(r.tickets>1?' ×'+r.tickets:'')+'</li>'; }).join('')+'</ul></div>';
+      }).join('')+'</div>';
+    document.getElementById('tf').addEventListener('submit',function(e){
+      e.preventDefault(); var f=e.target;
+      sb.from('event_tables').insert({event_id:EID,label:f.label.value.trim(),seats:+f.seats.value||10}).then(function(r){ if(r.error){ K.toast(t('err')); return; } loadEvent(); });
+    });
+    pane().querySelectorAll('[data-del]').forEach(function(b){ b.addEventListener('click',function(){
+      if(!confirm(t('delTable'))) return; var x=TABLES.find(function(y){ return y.id===+b.dataset.del; });
+      sb.from('registrations').update({table_no:null}).eq('event_id',EID).eq('table_no',x.label).then(function(){ sb.from('event_tables').delete().eq('id',x.id).then(loadEvent); });
+    }); });
+    document.getElementById('au').addEventListener('click',autoArrange);
+    document.getElementById('pr').addEventListener('click',printSheet);
+  }
+  function autoArrange(){
+    if(!confirm(t('autoQ'))) return;
+    var free={}; TABLES.forEach(function(x){ free[x.label]=(x.seats||10); });
+    REGS.forEach(function(r){ if(r.table_no&&free[r.table_no]!=null) free[r.table_no]-=r.tickets; });
+    /* friends = same booker, else same phone, else alone */
+    /* friends = same booker (the booker herself included), else same phone, else alone */
+    var bookers={}; REGS.forEach(function(r){ if(r.booked_by) bookers[r.booked_by.toLowerCase()]=1; });
+    var groups={}; REGS.filter(function(r){ return !r.table_no; }).forEach(function(r){
+      var c=r.contacts||{}, nm=String(c.name||'').toLowerCase();
+      var key=r.booked_by?'b:'+r.booked_by.toLowerCase():(bookers[nm]?'b:'+nm:(c.phone?'p:'+c.phone:'r:'+r.id));
+      (groups[key]=groups[key]||[]).push(r);
+    });
+    var list=Object.keys(groups).map(function(k){ return groups[k]; }).sort(function(a,b){ return sum(b,function(r){return r.tickets;})-sum(a,function(r){return r.tickets;}); });
+    var plan=[], left=0;
+    list.forEach(function(g){
+      var need=sum(g,function(r){return r.tickets;});
+      var lb=Object.keys(free).find(function(l){ return free[l]>=need; });
+      if(lb){ free[lb]-=need; g.forEach(function(r){ plan.push([r,lb]); }); }
+      else g.forEach(function(r){ var l2=Object.keys(free).find(function(l){ return free[l]>=r.tickets; }); if(l2){ free[l2]-=r.tickets; plan.push([r,l2]); } else left+=r.tickets; });
+    });
+    var byT={}; plan.forEach(function(p){ (byT[p[1]]=byT[p[1]]||[]).push(p[0].id); });
+    Promise.all(Object.keys(byT).map(function(l){ return sb.from('registrations').update({table_no:l}).in('id',byT[l]); })).then(function(){
+      K.toast(left?t('full'):t('autoDone').replace('%n',plan.length)); loadEvent();
+    });
+  }
+
+  /* ---------- flow / script / performances: one editor ---------- */
+  var CFG={
+    event_flow:[['start_time','f_time','short'],['item','f_item','text'],['owner','f_owner','short'],['notes','f_notes','area']],
+    event_script:[['section','f_section','short'],['speaker','f_speaker','short'],['body','f_body','area']],
+    event_performances:[['title','f_title','text'],['team','f_team','short'],['song','f_song','short'],['duration_min','f_min','num'],['members','f_members','area'],['notes','f_notes','area']]
+  };
+  var REQ={event_flow:'item',event_performances:'title'};
+  function editor(tbl){
+    sb.from(tbl).select('*').eq('event_id',EID).order('sort').order('id').then(function(r){
+      var rows=r.data||[], f=CFG[tbl];
+      pane().innerHTML='<div class="sh"><div class="cnt">'+rows.length+'</div><span style="display:flex;gap:6px"><button class="btn ghost" type="button" id="pr">'+t('print')+'</button><button class="btn cta" type="button" id="ad">'+ic('plus')+t('addRow')+'</button></span></div><div class="list">'+
+        (rows.length?rows.map(function(x,i){
+          var top=f.filter(function(c){ return c[2]!=='area'; }), rest=f.filter(function(c){ return c[2]==='area'; });
+          return '<div class="ed glass" data-id="'+x.id+'"><div class="top"><span class="num">'+(i+1)+'</span><span class="ops"><button type="button" data-mv="-1" aria-label="Up"'+(i?'':' disabled')+'>'+ic('up')+'</button><button type="button" data-mv="1" aria-label="Down"'+(i<rows.length-1?'':' disabled')+'>'+ic('down')+'</button><button type="button" data-rm aria-label="Delete">'+ic('trash')+'</button></span></div>'+
+            '<div class="grid2">'+top.map(function(c){ return '<label class="field"><span>'+t(c[1])+'</span><input class="inp" data-f="'+c[0]+'"'+(c[2]==='num'?' type="number" min="0"':'')+' value="'+esc(x[c[0]]==null?'':x[c[0]])+'"></label>'; }).join('')+'</div>'+
+            rest.map(function(c){ return '<label class="field"><span>'+t(c[1])+'</span><textarea class="inp" data-f="'+c[0]+'"'+(c[0]==='body'?' style="min-height:120px"':'')+'>'+esc(x[c[0]]||'')+'</textarea></label>'; }).join('')+'</div>';
+        }).join(''):'<div class="empty glass">'+t('empty')+'</div>')+'</div>';
+      document.getElementById('ad').addEventListener('click',function(){
+        var o={event_id:EID,sort:(rows.length?Math.max.apply(null,rows.map(function(x){return x.sort||0;})):0)+1};
+        if(REQ[tbl]) o[REQ[tbl]]=K.lang()==='zh'?'新项目':'New item';
+        sb.from(tbl).insert(o).then(function(res){ if(res.error){ K.toast(t('err')); return; } editor(tbl); });
+      });
+      document.getElementById('pr').addEventListener('click',printSheet);
+      pane().querySelectorAll('.ed').forEach(function(card,i){
+        var id=+card.dataset.id;
+        card.querySelectorAll('[data-f]').forEach(function(inp){ inp.addEventListener('change',function(){
+          var o={}, k=inp.dataset.f, v=inp.value.trim(); o[k]= k==='duration_min' ? (v===''?null:+v) : (v||(REQ[tbl]===k?'—':null));
+          sb.from(tbl).update(o).eq('id',id).then(function(res){ K.toast(res.error?t('err'):t('saved')); });
+        }); });
+        card.querySelectorAll('[data-mv]').forEach(function(b){ b.addEventListener('click',function(){
+          var j=i+(+b.dataset.mv), a=rows[i], c=rows[j]; if(!c) return;
+          /* rewrite sort as 1..n with the two swapped, so equal/blank sorts can't stick */
+          var order=rows.slice(); order[i]=c; order[j]=a;
+          Promise.all(order.map(function(x,n){ return sb.from(tbl).update({sort:n+1}).eq('id',x.id); })).then(function(){ editor(tbl); });
+        }); });
+        card.querySelector('[data-rm]').addEventListener('click',function(){ if(confirm(t('delQ'))) sb.from(tbl).delete().eq('id',id).then(function(){ editor(tbl); }); });
+      });
+    });
+  }
+
+  /* printable run sheet: flow + performances + MC script + tables, plain black & white */
+  function printSheet(){
+    var w=window.open('','_blank'); if(!w) return;
+    Promise.all(['event_flow','event_performances','event_script'].map(function(x){ return sb.from(x).select('*').eq('event_id',EID).order('sort').order('id'); })).then(function(r){
+      var fl=r[0].data||[], pf=r[1].data||[], sc=r[2].data||[];
+      var seats={}; REGS.forEach(function(g){ if(g.table_no) (seats[g.table_no]=seats[g.table_no]||[]).push((g.contacts||{}).name+(g.tickets>1?' ×'+g.tickets:'')); });
+      var h='<!doctype html><meta charset="utf-8"><title>'+esc(EV.name_en)+'</title><style>body{font-family:"Noto Sans SC",Arial,sans-serif;margin:24px;color:#111;font-size:13px}h1{font-size:20px;margin:0}h2{font-size:15px;margin:22px 0 6px;border-bottom:2px solid #111}table{width:100%;border-collapse:collapse}td,th{border:1px solid #bbb;padding:5px 7px;text-align:left;vertical-align:top}.s{white-space:pre-wrap}.cols{columns:3}.cols div{break-inside:avoid;margin-bottom:8px}</style>'+
+        '<h1>'+esc(EV.name_en)+(EV.name_zh?' · '+esc(EV.name_zh):'')+'</h1><div>'+esc(EV.event_date||'')+' '+esc(EV.start_time||'')+' · '+esc(EV.venue||'')+'</div>';
+      if(fl.length) h+='<h2>'+t('flow')+'</h2><table><tr><th>'+t('f_time')+'</th><th>'+t('f_item')+'</th><th>'+t('f_owner')+'</th><th>'+t('f_notes')+'</th></tr>'+fl.map(function(x){ return '<tr><td>'+esc(x.start_time)+'</td><td>'+esc(x.item)+'</td><td>'+esc(x.owner)+'</td><td>'+esc(x.notes)+'</td></tr>'; }).join('')+'</table>';
+      if(pf.length) h+='<h2>'+t('perf')+'</h2><table><tr><th>#</th><th>'+t('f_title')+'</th><th>'+t('f_team')+'</th><th>'+t('f_song')+'</th><th>'+t('f_min')+'</th><th>'+t('f_members')+'</th></tr>'+pf.map(function(x,i){ return '<tr><td>'+(i+1)+'</td><td>'+esc(x.title)+'</td><td>'+esc(x.team)+'</td><td>'+esc(x.song)+'</td><td>'+esc(x.duration_min)+'</td><td class="s">'+esc(x.members)+'</td></tr>'; }).join('')+'</table>';
+      if(sc.length) h+='<h2>'+t('script')+'</h2>'+sc.map(function(x){ return '<p><b>'+esc(x.section||'')+(x.speaker?' — '+esc(x.speaker):'')+'</b><br><span class="s">'+esc(x.body||'')+'</span></p>'; }).join('');
+      if(Object.keys(seats).length) h+='<h2>'+t('tables')+'</h2><div class="cols">'+TABLES.map(function(x){ return '<div><b>'+t('table')+' '+esc(x.label)+'</b><br>'+(seats[x.label]||[]).map(esc).join('<br>')+'</div>'; }).join('')+'</div>';
+      w.document.write(h+'<script>setTimeout(function(){print()},400)<\/script>'); w.document.close();
+    });
+  }
+
+  /* ---------- settings ---------- */
+  function formUrl(){ return location.href.replace(/event\.html.*$/,'register.html?e='+encodeURIComponent(EV.code)); }
+  function settings(){
+    pane().innerHTML='<div class="glass" style="padding:14px;display:flex;flex-direction:column;gap:10px">'+
+      '<label style="display:flex;gap:10px;align-items:center;font-weight:800"><input type="checkbox" id="op" style="width:22px;height:22px"'+(EV.open_for_registration?' checked':'')+'>'+t('open')+'</label>'+
+      (EV.open_for_registration?'<p class="small muted" style="margin:0">'+t('openOn')+'</p><div class="linkbox glass">'+ic('link')+'<span style="flex:1">'+esc(formUrl())+'</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn soft" id="cp" type="button">'+t('copy')+'</button><a class="btn cta" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(K.pick(EV.name_en,EV.name_zh)+' – '+formUrl())+'">'+ic('wa')+t('share')+'</a></div>':'<p class="small muted" style="margin:0">'+t('openOff')+'</p>')+
+      '</div><div style="margin-top:12px"><button class="btn soft" id="ed" type="button">'+t('settings')+' …</button></div>';
+    document.getElementById('op').addEventListener('change',function(){ var v=this.checked; sb.from('events').update({open_for_registration:v}).eq('id',EID).then(function(r){ if(r.error){ K.toast(t('err')); return; } EV.open_for_registration=v; settings(); }); });
+    var cp=document.getElementById('cp'); if(cp) cp.addEventListener('click',function(){ navigator.clipboard.writeText(formUrl()).then(function(){ K.toast(t('copied')); }); });
+    document.getElementById('ed').addEventListener('click',function(){ settingsSheet(EV); });
+  }
+  function settingsSheet(e){
+    var v=e||{};
+    function fld(k,lab,type,extra){ return '<label class="field"><span>'+t(lab)+'</span><input class="inp" name="'+k+'" type="'+(type||'text')+'" value="'+esc(v[k]==null?'':v[k])+'"'+(extra||'')+'></label>'; }
+    openSheet(e?t('settings'):t('newEv'),'<form id="sf" style="display:flex;flex-direction:column;gap:10px">'+
+      '<div class="grid2">'+fld('name_en','s_en','text',' required')+fld('name_zh','s_zh')+'</div>'+
+      '<div class="grid2">'+fld('code','s_code','text',' required placeholder="NL4"')+fld('event_date','s_date','date')+'</div>'+
+      '<div class="grid2">'+fld('start_time','s_time','text',' placeholder="11:00 AM – 3:00 PM"')+fld('venue','s_venue')+'</div>'+
+      '<div class="grid2">'+fld('price','s_price','number',' min="0" step="0.01"')+fld('capacity','s_cap','number',' min="0"')+'</div>'+
+      '<label class="field"><span>'+t('s_notes')+'</span><textarea class="inp" name="notes">'+esc(v.notes||'')+'</textarea></label>'+
+      '<button class="btn cta" style="justify-content:center">'+(e?t('save'):t('create'))+'</button></form>');
+    sheet.querySelector('#sf').addEventListener('submit',function(ev){
+      ev.preventDefault(); var f=ev.target, o={};
+      ['name_en','name_zh','code','event_date','start_time','venue','price','capacity','notes'].forEach(function(k){ var x=f.elements[k].value.trim(); o[k]=x===''?null:(k==='price'||k==='capacity'?+x:x); });
+      o.code=String(o.code).toUpperCase().replace(/\s+/g,'');
+      var p = e ? sb.from('events').update(o).eq('id',e.id).select('id').single() : sb.from('events').insert(o).select('id').single();
+      p.then(function(r){
+        if(r.error){ K.toast(/duplicate|unique/i.test(r.error.message)?t('codeTaken'):t('err')); return; }
+        closeSheet(); if(e) loadEvent(); else location.href='?id='+r.data.id+'&tab=settings';
+      });
+    });
+  }
+})();
+</script>
+<script src="admin-nav.js" data-active="events"></script>
+</body>
+</html>

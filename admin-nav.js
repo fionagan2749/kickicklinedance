@@ -25,9 +25,9 @@
   var MENU=[
     {en:'Overview',zh:'总览',items:[['dashboard','home','Dashboard','管理首页','admin.html'],['report','chart','Workshop report','活动报告','events.html']]},
     {en:'Classes',zh:'课程',items:[['classes','cal','Classes & timetable','课程与课表','classes.html'],['teachers','teacher','Teachers','老师','./#teachers'],['venues','pin','Venues & areas','场地与地区',null]]},
-    {en:'Students',zh:'学生',items:[['students','users','Students','学生',null],['checkin','qr','Check-in & attendance','签到与出席',null],['packages','ticket','Packages & credits','配套与 Credit',null]]},
+    {en:'Students',zh:'学生',items:[['students','users','Students','学生','students.html'],['checkin','qr','Check-in & attendance','签到与出席','event.html'],['packages','ticket','Packages & credits','配套与 Credit',null]]},
     {en:'Money',zh:'财务',items:[['payments','cash','Payments','付款记录',null],['pricing','tag','Pricing','收费方案',null]]},
-    {en:'Community',zh:'活动与社群',items:[['events','star','Events & workshops','活动与体验日','events.html'],['announce','mega','Announcements','公告',null],['media','video','Videos & photos','影片与照片',null],['shop','bag','Shop','商店','products.html']]},
+    {en:'Community',zh:'活动与社群',items:[['events','star','Events & workshops','活动与体验日','event.html'],['announce','mega','Announcements','公告',null],['media','video','Videos & photos','影片与照片',null],['shop','bag','Shop','商店','products.html']]},
     {en:'System',zh:'系统',items:[['settings','gear','Settings','设置',null],['site','globe','View public site','查看公开网站','./']]}
   ];
   var css=''+

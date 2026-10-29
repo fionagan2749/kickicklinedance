@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Students · KickickLineDance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kld-admin.css">
+<!-- Layout: Wendy's contact book. Search on top → 4 numbers → filter chips → people list (repeat attendees first). Tap a person = sheet with WhatsApp, event history, edit, same-phone merge. -->
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="who"><small data-t="kicker"></small><b data-t="title"></b></div>
+    <div class="lang glass-pill" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </header>
+  <div id="me"></div>
+
+  <section style="margin-top:8px">
+    <label class="search glass-pill"><span id="sic"></span><input id="q" type="search" data-ph="ph" autocomplete="off" aria-label="Search"></label>
+  </section>
+
+  <section class="stats" id="stats"></section>
+
+  <section>
+    <div class="chips" id="chips"></div>
+    <div class="sh" style="margin:6px 0 0">
+      <div class="cnt" id="cnt"></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn soft" id="add" type="button"></button>
+        <button class="btn ghost" id="csv" type="button"></button>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+    <div style="text-align:center;margin-top:12px"><button class="btn soft" id="more" type="button" hidden></button></div>
+  </section>
+</div>
+
+<div class="sheet-back" id="back" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
+
+<script>if(location.hostname==='localhost'&&/mock/.test(location.search))document.write('<script src="kld-mock.js"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="kld-db.js"></script>
+<script>
+(function(){
+  var K=KLD, sb=K.sb, esc=K.esc;
+  var T={
+    kicker:['Students','学生'], title:['Everyone who joined us','所有来过的学员'],
+    ph:['Search name, phone or area','搜名字、电话或地区'],
+    total:['people','人'], rep:['came 2+ times','来过 2 次以上'], all3:['came to every event','每场都来'], withph:['have a phone no.','有电话'],
+    f_all:['All','全部'], f_rep:['Repeat 2+','回头客 2+'], f_new:['Came once','只来过一次'], f_noph:['No phone','没电话'], f_dup:['Same phone','同一电话'],
+    s_events:['Most events','来最多次'], s_name:['Name A–Z','名字 A–Z'], s_recent:['Most recent','最近来过'],
+    area:['All areas','全部地区'],
+    shown:['%n of %t shown','显示 %n / %t'], add:['Add','新增'], csv:['Export','导出'], more:['Show more','显示更多'],
+    none:['Nobody matches. Try a shorter word.','找不到，试短一点的字。'],
+    events:['events','场'], tix:['tickets','张票'],
+    history:['Event history','活动记录'], edit:['Details','资料'], name:['Name','名字'], phone:['Phone','电话'], areaL:['Area','地区'], notes:['Notes for Wendy','备注'],
+    save:['Save','保存'], saved:['Saved','已保存'], wa:['WhatsApp','WhatsApp'],
+    same:['Same phone number','同一个电话号码'], sameNote:['One phone can book for friends. Merge only if it is the SAME person.','一个电话可能帮朋友订。确定是同一个人才合并。'],
+    merge:['Same person – merge','同一个人 – 合并'], mergeQ:['Merge %b into %a? Their events move to %a.','把 %b 合并到 %a？活动记录会移过来。'],
+    merged:['Merged','已合并'], del:['Delete person','删除这个人'], delQ:['Delete %a and all their event records?','删除 %a 和所有活动记录？'],
+    newT:['Add a student','新增学员'], create:['Add student','新增'], needName:['Please type a name','请输入名字'],
+    by:['booked by','订票人'], paid:['paid','已付'], wl:["Wendy's list",'Wendy 名单'], ml:["Melvin's list",'Melvin 名单'], form:['Form','报名表格'], manual:['Added by hand','手动加入'],
+    first:['First time','第一次'], err:['Something went wrong. Try again.','出错了，请再试。']
+  };
+  function t(k){ return T[k][K.lang()==='zh'?1:0]; }
+  var ALL=[], EVENTS=[], view={q:'',f:'all',sort:'events',area:'',limit:60};
+
+  document.getElementById('sic').innerHTML=K.icon('search');
+
+  K.gate(load);
+  K.onLang(function(){ K.apply(T); render(); });
+
+  function load(){
+    Promise.all([
+      sb.from('contact_summary').select('*'),
+      sb.from('events').select('id,code,name_en,name_zh,event_date').order('event_date')
+    ]).then(function(r){
+      if(r[0].error||r[1].error){ K.toast(t('err')); return; }
+      ALL=r[0].data; EVENTS=r[1].data; render();
+    });
+  }
+
+  function digits(s){ return String(s).replace(/\D/g,''); }
+  function match(c,q){
+    if(!q) return true;
+    var ql=q.toLowerCase(), d=digits(q);
+    if((c.name||'').toLowerCase().indexOf(ql)>=0) return true;
+    if((c.area||'').toLowerCase().indexOf(ql)>=0) return true;
+    if((c.notes||'').toLowerCase().indexOf(ql)>=0) return true;
+    if(d.length>=3 && c.phone){ var core=d.replace(/^60?/,''); if(c.phone.indexOf(core)>=0) return true; }
+    return false;
+  }
+  function filtered(){
+    var list=ALL.filter(function(c){
+      if(!match(c,view.q)) return false;
+      if(view.area && c.area!==view.area) return false;
+      if(view.f==='rep') return c.events_count>=2;
+      if(view.f==='new') return c.events_count<=1;
+      if(view.f==='noph') return !c.phone;
+      if(view.f==='dup') return c.same_phone>0;
+      if(view.f.indexOf('ev:')===0) return c.event_codes.indexOf(view.f.slice(3))>=0;
+      return true;
+    });
+    list.sort(function(a,b){
+      if(view.sort==='name') return a.name.localeCompare(b.name);
+      if(view.sort==='recent') return String(b.last_event||'').localeCompare(String(a.last_event||'')) || b.events_count-a.events_count;
+      return b.events_count-a.events_count || b.tickets_total-a.tickets_total || a.name.localeCompare(b.name);
+    });
+    return list;
+  }
+
+  function render(){
+    K.apply(T);
+    var rep=ALL.filter(function(c){return c.events_count>=2;}).length, all3=ALL.filter(function(c){return EVENTS.length&&c.events_count>=EVENTS.length;}).length;
+    document.getElementById('stats').innerHTML=
+      stat(ALL.length,t('total'))+stat(rep,t('rep'))+stat(all3,t('all3'))+stat(ALL.filter(function(c){return c.phone;}).length,t('withph'));
+    var areas={}; ALL.forEach(function(c){ if(c.area) areas[c.area]=(areas[c.area]||0)+1; });
+    var ch=[['all','f_all'],['rep','f_rep'],['new','f_new']].map(function(f){ return chip(f[0],t(f[1])); }).join('');
+    EVENTS.forEach(function(e){ ch+=chip('ev:'+e.code, e.code.replace(/^NL(\d)$/,'Nasi Lemak $1.0')); });
+    ch+=chip('dup',t('f_dup'))+chip('noph',t('f_noph'));
+    ch+='<select class="chip" id="area" aria-label="Area"><option value="">'+t('area')+'</option>'+Object.keys(areas).sort().map(function(a){ return '<option'+(a===view.area?' selected':'')+' value="'+esc(a)+'">'+esc(a)+' ('+areas[a]+')</option>'; }).join('')+'</select>';
+    ch+='<select class="chip" id="sort" aria-label="Sort">'+['events','recent','name'].map(function(s){ return '<option value="'+s+'"'+(s===view.sort?' selected':'')+'>'+t('s_'+s)+'</option>'; }).join('')+'</select>';
+    var cEl=document.getElementById('chips'); cEl.innerHTML=ch;
+    cEl.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ view.f=b.dataset.f; view.limit=60; render(); }); });
+    cEl.querySelector('#area').addEventListener('change',function(){ view.area=this.value; view.limit=60; render(); });
+    cEl.querySelector('#sort').addEventListener('change',function(){ view.sort=this.value; render(); });
+
+    var list=filtered(), shown=list.slice(0,view.limit);
+    document.getElementById('cnt').textContent=t('shown').replace('%n',list.length).replace('%t',ALL.length);
+    document.getElementById('add').innerHTML=K.icon('plus')+t('add');
+    document.getElementById('csv').innerHTML=K.icon('dl')+t('csv');
+    var L=document.getElementById('list');
+    L.innerHTML = shown.length ? shown.map(rowHtml).join('') : '<div class="empty glass">'+t('none')+'</div>';
+    L.querySelectorAll('[data-id]').forEach(function(b){ b.addEventListener('click',function(){ openPerson(+b.dataset.id); }); });
+    var m=document.getElementById('more'); m.hidden=list.length<=view.limit; m.textContent=t('more')+' ('+(list.length-view.limit)+')';
+  }
+  function stat(v,l){ return '<div class="stat glass"><div class="v">'+v+'</div><div class="t">'+l+'</div></div>'; }
+  function chip(f,label){ return '<button type="button" class="chip" data-f="'+f+'" aria-pressed="'+(view.f===f)+'">'+esc(label)+'</button>'; }
+  function evTag(code){ return '<span class="tag ev">'+esc(code.replace(/^NL(\d)$/,'$1.0'))+'</span>'; }
+  function rowHtml(c){
+    var badge = c.events_count>=2 ? '<span class="tag rep">×'+c.events_count+' '+t('events')+'</span>' : (c.events_count===1?'<span class="tag plain">'+t('first')+'</span>':'');
+    return '<button type="button" class="row glass" data-id="'+c.id+'"><span class="av">'+esc(K.initials(c.name))+'</span><span class="main"><span class="nm">'+esc(c.name)+'</span>'+
+      '<span class="sub">'+[c.phone?K.showPhone(c.phone):'',c.area].filter(Boolean).map(esc).join(' · ')+(c.same_phone?' <span class="tag warn">'+t('f_dup')+'</span>':'')+'</span></span>'+
+      '<span class="end">'+badge+'<span style="display:flex;gap:3px">'+c.event_codes.map(evTag).join('')+'</span></span></button>';
+  }
+
+  document.getElementById('q').addEventListener('input',function(){ view.q=this.value.trim(); view.limit=60; render(); });
+  document.getElementById('more').addEventListener('click',function(){ view.limit+=100; render(); });
+  document.getElementById('csv').addEventListener('click',function(){
+    var rows=[['Name','Phone','Area','Events','Event codes','Tickets','Notes']].concat(filtered().map(function(c){ return [c.name,c.phone||'',c.area||'',c.events_count,c.event_codes.join(' '),c.tickets_total,c.notes||'']; }));
+    var csv='﻿'+rows.map(function(r){ return r.map(function(v){ v=String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(','); }).join('\n');
+    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='kickick-students.csv'; a.click();
+  });
+
+  /* ---- person sheet ---- */
+  var sheet=document.getElementById('sheet'), back=document.getElementById('back');
+  function closeSheet(){ sheet.hidden=true; back.hidden=true; }
+  back.addEventListener('click',closeSheet);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeSheet(); });
+  function openSheet(html){ sheet.innerHTML=html; sheet.hidden=false; back.hidden=false; var x=sheet.querySelector('.x'); if(x){ x.addEventListener('click',closeSheet); x.focus(); } }
+
+  function srcLabel(s){ return {wendy_list:t('wl'),melvin_list:t('ml'),form:t('form'),manual:t('manual')}[s]||s; }
+  function openPerson(id){
+    var c=ALL.find(function(x){return x.id===id;}); if(!c) return;
+    var same=c.phone?ALL.filter(function(x){ return x.phone===c.phone && x.id!==c.id; }):[];
+    openSheet('<div class="hd"><span class="av">'+esc(K.initials(c.name))+'</span><div style="flex:1;min-width:0"><h3>'+esc(c.name)+'</h3><div class="muted small">'+[c.phone?K.showPhone(c.phone):'',c.area].filter(Boolean).map(esc).join(' · ')+'</div></div><button class="x" type="button" aria-label="Close">'+K.icon('x')+'</button></div>'+
+      (c.phone?'<a class="btn cta" href="'+K.wa(c.phone,'Hi '+c.name.replace(/\(.*?\)/g,'').trim()+', ')+'" target="_blank" rel="noopener">'+K.icon('wa')+t('wa')+'</a>':'')+
+      '<h4 style="margin:18px 0 4px">'+t('history')+'</h4><div class="hist" id="hist"><div class="muted">…</div></div>'+
+      (same.length?'<h4 style="margin:18px 0 4px">'+t('same')+'</h4><p class="muted small" style="margin:0 0 6px">'+t('sameNote')+'</p><div class="hist">'+same.map(function(s){ return '<div style="display:flex;align-items:center;gap:8px"><span style="flex:1"><b>'+esc(s.name)+'</b> · '+s.events_count+' '+t('events')+'</span><button class="btn soft" type="button" data-merge="'+s.id+'" style="padding:7px 12px;font-size:13px">'+K.icon('merge')+t('merge')+'</button></div>'; }).join('')+'</div>':'')+
+      '<h4 style="margin:18px 0 8px">'+t('edit')+'</h4><form id="pf" style="display:flex;flex-direction:column;gap:10px">'+
+      '<div class="grid2"><label class="field"><span>'+t('name')+'</span><input class="inp" name="name" required value="'+esc(c.name)+'"></label>'+
+      '<label class="field"><span>'+t('phone')+'</span><input class="inp" name="phone" inputmode="tel" value="'+esc(c.phone?K.showPhone(c.phone):'')+'"></label></div>'+
+      '<label class="field"><span>'+t('areaL')+'</span><input class="inp" name="area" value="'+esc(c.area||'')+'"></label>'+
+      '<label class="field"><span>'+t('notes')+'</span><textarea class="inp" name="notes">'+esc(c.notes||'')+'</textarea></label>'+
+      '<div style="display:flex;gap:8px;justify-content:space-between"><button class="btn danger" type="button" id="del">'+K.icon('trash')+t('del')+'</button><button class="btn cta">'+t('save')+'</button></div></form>');
+
+    sb.from('registrations').select('id,tickets,amount,paid,booked_by,source,notes,events(code,name_en,name_zh,event_date)').eq('contact_id',id).then(function(r){
+      var h=document.getElementById('hist'); if(!h) return;
+      var rows=(r.data||[]).sort(function(a,b){ return String(a.events.event_date).localeCompare(String(b.events.event_date)); });
+      h.innerHTML=rows.map(function(x){
+        return '<div><b>'+esc(K.pick(x.events.name_en,x.events.name_zh))+'</b> · '+K.fmtDate(x.events.event_date)+'<br><span class="muted">'+
+          x.tickets+' '+t('tix')+(x.amount?' · RM'+(+x.amount):'')+(x.paid?' · '+t('paid'):'')+(x.booked_by?' · '+t('by')+' '+esc(x.booked_by):'')+' · '+srcLabel(x.source)+(x.notes?' · '+esc(x.notes):'')+'</span></div>';
+      }).join('') || '<div class="muted">–</div>';
+    });
+    sheet.querySelectorAll('[data-merge]').forEach(function(b){ b.addEventListener('click',function(){
+      var o=ALL.find(function(x){return x.id===+b.dataset.merge;});
+      if(!confirm(t('mergeQ').replace('%b',o.name).replace(/%a/g,c.name))) return;
+      sb.from('registrations').update({contact_id:c.id}).eq('contact_id',o.id).then(function(r){
+        if(r.error){ K.toast(t('err')); return; }
+        var notes=[c.notes,o.notes,'merged: '+o.name].filter(Boolean).join(' | ');
+        sb.from('contacts').update({notes:notes}).eq('id',c.id).then(function(){
+          sb.from('contacts').delete().eq('id',o.id).then(function(){ K.toast(t('merged')); closeSheet(); load(); });
+        });
+      });
+    }); });
+    sheet.querySelector('#del').addEventListener('click',function(){
+      if(!confirm(t('delQ').replace('%a',c.name))) return;
+      sb.from('registrations').delete().eq('contact_id',c.id).then(function(){
+        sb.from('contacts').delete().eq('id',c.id).then(function(r){ if(r.error){ K.toast(t('err')); return; } closeSheet(); load(); });
+      });
+    });
+    sheet.querySelector('#pf').addEventListener('submit',function(e){
+      e.preventDefault(); var f=e.target;
+      var row={name:f.name.value.trim(), phone:K.normPhone(f.phone.value), area:f.area.value.trim()||null, notes:f.notes.value.trim()||null};
+      if(!row.name){ K.toast(t('needName')); return; }
+      sb.from('contacts').update(row).eq('id',c.id).then(function(r){ if(r.error){ K.toast(t('err')); return; } K.toast(t('saved')); closeSheet(); load(); });
+    });
+  }
+
+  document.getElementById('add').addEventListener('click',function(){
+    openSheet('<div class="hd"><h3 style="flex:1">'+t('newT')+'</h3><button class="x" type="button" aria-label="Close">'+K.icon('x')+'</button></div><form id="nf" style="display:flex;flex-direction:column;gap:10px">'+
+      '<label class="field"><span>'+t('name')+'</span><input class="inp" name="name" required></label>'+
+      '<div class="grid2"><label class="field"><span>'+t('phone')+'</span><input class="inp" name="phone" inputmode="tel"></label><label class="field"><span>'+t('areaL')+'</span><input class="inp" name="area"></label></div>'+
+      '<label class="field"><span>'+t('notes')+'</span><textarea class="inp" name="notes"></textarea></label><button class="btn cta" style="justify-content:center">'+t('create')+'</button></form>');
+    sheet.querySelector('#nf').addEventListener('submit',function(e){
+      e.preventDefault(); var f=e.target;
+      var row={name:f.name.value.trim(), phone:K.normPhone(f.phone.value), area:f.area.value.trim()||null, notes:f.notes.value.trim()||null};
+      if(!row.name){ K.toast(t('needName')); return; }
+      sb.from('contacts').insert(row).then(function(r){ if(r.error){ K.toast(t('err')); return; } K.toast(t('saved')); closeSheet(); load(); });
+    });
+  });
+})();
+</script>
+<script src="admin-nav.js" data-active="students"></script>
+</body>
+</html>
