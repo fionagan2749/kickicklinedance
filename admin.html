@@ -9,13 +9,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
-/* Layout: phone-first admin column (2 columns from 900px); summary first (hero + KPI tiles), then per-event detail, then where people come from. Same glass system as the public site. */
+/* Layout: Wendy's everyday admin home, phone first (2 columns from 900px): today hero → key numbers → quick actions → today's classes → this week → to-do. Same glass system as the public site. */
 :root{
   --ink:#1E1B4B; --muted:#6B6688; --faint:#E9E2F2;
   --rim:linear-gradient(135deg,#FFB3D6 0%,#fff 20%,#9FE6FF 40%,#fff 58%,#C9B2FF 76%,#FFC9A3 92%);
   --cta:linear-gradient(90deg,#FF8A3D 0%,#FF4F8B 50%,#A63CF0 100%);
-  --s1:#D6337A;  /* Wendy's list  */
-  --s2:#6D4BD8;  /* Melvin's list */
+  --good:#1FA971; --goodbg:#E3F6EE; --live:#2563EB; --livebg:#E3EDFD; --warn:#B45309; --warnbg:#FEF3C7;
   --font:"Plus Jakarta Sans","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
 }
 *{box-sizing:border-box}
@@ -30,7 +29,7 @@ body{margin:0;color:var(--ink);font-family:var(--font);font-size:15px;line-heigh
   background-attachment:fixed;min-height:100vh}
 a{color:inherit}
 button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
+button:focus-visible,a:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
 .app{max-width:980px;margin:0 auto;padding:0 16px 40px}
 .glass,.glass-pill{border:1.3px solid transparent;
   background:linear-gradient(165deg,rgba(255,255,255,.86),rgba(255,255,255,.55)) padding-box, var(--rim) border-box;
@@ -41,306 +40,253 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid 
 
 header{position:sticky;top:0;z-index:20;padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;display:flex;align-items:center;gap:10px}
 header::before{content:"";position:absolute;inset:0 -16px;z-index:-1;background:linear-gradient(rgba(252,243,238,.9),rgba(252,243,238,.65));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-.back{width:44px;height:44px;display:grid;place-items:center;text-decoration:none;flex-shrink:0}
-.brand{flex:1;min-width:0}
-.brand b{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.logo{width:46px;height:46px;border-radius:15px;overflow:hidden;flex-shrink:0;display:block}
+.logo img{width:100%;height:100%;object-fit:cover}
+.who{flex:1;min-width:0}
+.who small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.who b{display:block;font-size:16.5px;font-weight:800;line-height:1.25}
 .lang{display:flex;padding:3px;gap:2px;flex-shrink:0}
 .lang button{border:0;background:transparent;font-weight:700;font-size:13px;padding:7px 9px;border-radius:999px}
 .lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
 
-h1{font-size:22px;margin:6px 0 2px;font-weight:800;text-wrap:balance}
-.lede{margin:0 0 14px;color:var(--muted);font-size:13.5px;max-width:62ch}
-h2{font-size:17px;margin:0 0 4px;font-weight:800}
-.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
-section{margin-top:18px}
+section{margin-top:20px}
+.sh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;gap:10px}
+.sh h2{font-size:17px;margin:0;font-weight:800}
+.sh a{font-size:13px;font-weight:800;color:#A63CF0;text-decoration:none;white-space:nowrap}
 
-/* hero number */
-.hero{border-radius:26px;padding:18px 20px;color:#fff;position:relative;overflow:hidden;border:1.3px solid transparent;
+/* today hero */
+.hero{border-radius:26px;padding:18px 20px;color:#fff;position:relative;overflow:hidden;border:1.3px solid transparent;margin-top:4px;
   background:linear-gradient(135deg,rgba(255,138,61,.92),rgba(255,79,139,.9) 50%,rgba(166,60,240,.9)) padding-box,var(--rim) border-box;
   box-shadow:0 18px 40px -18px rgba(166,60,240,.55)}
 .hero::after{content:"";position:absolute;right:-40px;top:-50px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.35),transparent 65%)}
 .hero .k{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;opacity:.92}
-.hero .n{font-size:46px;font-weight:800;line-height:1.05;letter-spacing:-1px;font-variant-numeric:tabular-nums;margin:4px 0}
-.hero .d{font-size:14px;opacity:.95;max-width:44ch}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.chips span{background:rgba(255,255,255,.22);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:700}
+.hero .n{font-size:40px;font-weight:800;line-height:1.05;letter-spacing:-1px;margin:4px 0;font-variant-numeric:tabular-nums}
+.hero .d{font-size:14.5px;opacity:.96;position:relative}
+.hero .next{margin-top:12px;display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.22);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;position:relative}
 
 .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-.kpi{padding:14px}
-.kpi .t{font-size:12.5px;color:var(--muted);font-weight:600}
-.kpi .v{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:2px}
-.kpi .s{font-size:12px;color:var(--muted)}
+.kpi{padding:14px;display:flex;gap:12px;align-items:center;text-decoration:none}
+.ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.9)}
+.ic svg{width:22px;height:22px}
+.kpi .v{font-size:24px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .t{font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.3}
 
-/* chart cards */
-.card{padding:16px}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;font-weight:600;margin:0 0 10px}
-.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:6px;vertical-align:-1px}
-.viewtog{float:right;border:1px solid var(--faint);background:#fff;border-radius:999px;font-size:12px;font-weight:700;padding:4px 10px}
+/* quick actions */
+.qa{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.qa a,.qa button{border:0;background:transparent;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px;font-weight:700;text-align:center;line-height:1.25;padding:0}
+.qa .tile{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;border:1.3px solid transparent}
+.qa .tile svg{width:26px;height:26px}
 
-/* stacked columns: registrations per event */
-.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:end;height:220px;padding:0 30px 0 4px;border-bottom:1px solid var(--faint);position:relative}
-.cols .grid{position:absolute;left:0;right:0;border-top:1px dashed var(--faint);font-size:11px;color:var(--muted)}
-.cols .grid span{position:absolute;right:0;top:-15px;font-variant-numeric:tabular-nums}
-.col{display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%;position:relative;z-index:1;max-width:76px;margin:0 auto;width:100%}
-.col .tot{font-size:14px;font-weight:800;text-align:center;margin-bottom:4px;font-variant-numeric:tabular-nums}
-.seg{width:100%;cursor:pointer}
-.seg+.seg{border-bottom:2px solid #fff}
-.seg.top{border-radius:4px 4px 0 0}
-.collabels{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:6px 30px 0 4px;text-align:center;font-size:12.5px}
-.collabels b{display:block;font-size:13.5px}
-.collabels span{color:var(--muted)}
+/* class lists */
+.list{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--faint)}
+.row:last-child{border-bottom:0}
+.time{text-align:center;line-height:1.1}
+.time b{display:block;font-size:16px;font-variant-numeric:tabular-nums}
+.time span{font-size:11.5px;color:var(--muted)}
+.cls{min-width:0}
+.cls b{display:block;font-size:14.5px;line-height:1.3}
+.cls span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st{font-size:12px;font-weight:800;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.st.done{background:#EEEAF4;color:var(--muted)}
+.st.live{background:var(--goodbg);color:var(--good)}
+.st.soon{background:var(--livebg);color:var(--live)}
+.empty{padding:16px;color:var(--muted);font-size:14px;text-align:center}
 
-/* horizontal bars: where people come from */
-.bars{display:flex;flex-direction:column;gap:7px}
-.bar{display:grid;grid-template-columns:132px 1fr 34px;align-items:center;gap:8px;font-size:13.5px;cursor:default}
-.bar .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar .trk{height:14px;position:relative}
-.bar .fill{height:100%;background:var(--s2);border-radius:0 4px 4px 0}
-.bar .val{font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
-.bar:hover .fill{filter:brightness(1.12)}
+.week .day{padding:10px 14px;border-bottom:1px solid var(--faint);display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:start}
+.week .day:last-child{border-bottom:0}
+.week .dn{font-weight:800;font-size:14px}
+.week .dn.today{color:#C02F7A}
+.week .ds{font-size:13px;display:flex;flex-direction:column;gap:2px}
+.week .ds span{color:var(--muted)}
 
-/* event cards */
-.events{display:grid;grid-template-columns:1fr;gap:12px}
-.ev{padding:16px}
-.ev .tag{display:inline-block;font-size:11.5px;font-weight:800;color:#fff;background:var(--cta);border-radius:999px;padding:3px 10px;letter-spacing:.5px}
-.ev h3{margin:8px 0 2px;font-size:16.5px;font-weight:800}
-.ev .meta{font-size:13px;color:var(--muted);margin:0 0 10px}
-.ev dl{display:grid;grid-template-columns:1fr auto;gap:5px 10px;margin:0;font-size:13.5px}
-.ev dt{color:var(--muted)}
-.ev dd{margin:0;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
-.ev dd.big{font-size:16px}
-.ev .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:0}
-.ev .rule{grid-column:1/-1;border-top:1px solid var(--faint);margin:2px 0}
+/* to-do */
+.todo{display:flex;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--faint);text-decoration:none}
+.todo:last-child{border-bottom:0}
+.todo .ic{width:38px;height:38px;border-radius:12px}
+.todo .ic svg{width:19px;height:19px}
+.todo div{flex:1;min-width:0}
+.todo b{display:block;font-size:14px}
+.todo span{display:block;font-size:12.5px;color:var(--muted)}
+.todo i{font-style:normal;font-size:20px;color:var(--muted)}
 
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--faint);font-variant-numeric:tabular-nums}
-th:first-child,td:first-child{text-align:left}
-.tablewrap{overflow-x:auto}
-
-.note{font-size:12.5px;color:var(--muted);padding:14px 16px;margin-top:18px}
-.note b{color:var(--ink)}
-.tip{position:fixed;z-index:50;pointer-events:none;background:#1E1B4B;color:#fff;font-size:12.5px;border-radius:10px;padding:7px 10px;box-shadow:0 8px 20px rgba(0,0,0,.2);max-width:220px}
-.tip b{display:block}
+.foot{margin-top:18px;font-size:12.5px;color:var(--muted);text-align:center}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:40}
 
 @media (min-width:900px){
-  .top{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;align-items:stretch}
+  .top{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
   .top .kpis{margin-top:0}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
-  .events{grid-template-columns:repeat(3,1fr)}
+  .qa{grid-template-columns:repeat(8,minmax(0,1fr))}
 }
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <a class="back glass-pill" href="./" aria-label="Back to site"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></a>
-    <div class="brand"><b>KickickLineDance</b><small data-t="role"></small></div>
+    <a class="logo glass" href="./" aria-label="Public site"><img src="app-logo.png" alt=""></a>
+    <div class="who"><small id="today"></small><b data-t="hello"></b></div>
     <div class="lang glass-pill" role="group" aria-label="Language">
       <button type="button" data-lang="en" aria-pressed="true">EN</button>
       <button type="button" data-lang="zh" aria-pressed="false">中文</button>
     </div>
   </header>
 
-  <h1 data-t="title"></h1>
-  <p class="lede" data-t="lede"></p>
-
   <div class="top">
     <div class="hero">
       <div class="k" data-t="heroK"></div>
       <div class="n" id="heroN"></div>
-      <div class="d" data-t="heroD"></div>
-      <div class="chips" id="heroChips"></div>
+      <div class="d" id="heroD"></div>
+      <div class="next" id="heroNext"></div>
     </div>
     <div class="kpis" id="kpis"></div>
   </div>
 
-  <div class="two">
-    <section class="card glass" aria-labelledby="c1">
-      <button class="viewtog" type="button" id="tog1" data-t="table"></button>
-      <h2 id="c1" data-t="c1Title"></h2>
-      <p class="sub" data-t="c1Sub"></p>
-      <div class="legend" id="leg1"></div>
-      <div id="chart1">
-        <div class="cols" id="cols"></div>
-        <div class="collabels" id="collabels"></div>
-      </div>
-      <div class="tablewrap" id="table1" hidden></div>
-    </section>
+  <section>
+    <div class="sh"><h2 data-t="qaTitle"></h2></div>
+    <div class="qa" id="qa"></div>
+  </section>
 
-    <section class="card glass" aria-labelledby="c2">
-      <button class="viewtog" type="button" id="tog2" data-t="table"></button>
-      <h2 id="c2" data-t="c2Title"></h2>
-      <p class="sub" id="c2Sub"></p>
-      <div class="bars" id="bars"></div>
-      <div class="tablewrap" id="table2" hidden></div>
+  <div class="two">
+    <section>
+      <div class="sh"><h2 id="todayTitle"></h2><a href="classes.html" data-t="allClasses"></a></div>
+      <div class="glass list" id="todayList"></div>
+    </section>
+    <section>
+      <div class="sh"><h2 data-t="weekTitle"></h2></div>
+      <div class="glass week" id="week"></div>
     </section>
   </div>
 
-  <section aria-labelledby="c3">
-    <h2 id="c3" data-t="c3Title"></h2>
-    <p class="sub" data-t="c3Sub"></p>
-    <div class="events" id="events"></div>
+  <section>
+    <div class="sh"><h2 data-t="todoTitle"></h2></div>
+    <div class="glass" id="todo"></div>
   </section>
 
-  <div class="note glass" id="note"></div>
+  <p class="foot" data-t="foot"></p>
 </div>
-<div class="tip" id="tip" hidden></div>
+<div class="toast" id="toast" hidden></div>
 
 <script>
 (function(){
-  /* Counts read from Wendy's handwritten notebooks and Melvin's printed lists (photos sent 2026-10-29).
-     Only totals are published here: names and phone numbers stay off this public page. */
-  var EVENTS=[
-    {id:'1.0',date:'2026-06-14',price:25,wendy:58,melvin:53,
-      en:{name:'Nasi Lemak Workshop 1.0',when:'Sun 14 Jun 2026 · 11 AM–3 PM',venue:'KL Wellness City'},
-      zh:{name:'辣死你妈 1.0 · 广场舞体验日',when:'2026年6月14日 星期日 · 上午11点–下午3点',venue:'KL Wellness City'}},
-    {id:'2.0',date:'2026-08-23',price:38,wendy:100,melvin:139,
-      en:{name:'Nasi Lemak Square Dance 2.0',when:'Sun 23 Aug 2026',venue:'W in the Sky'},
-      zh:{name:'辣死你妈 2.0 · 广场舞',when:'2026年8月23日 星期日',venue:'W in the Sky'}},
-    {id:'3.0',date:'2026-09-13',price:28,wendy:53,melvin:69,
-      en:{name:'Nasi Lemak Workshop Day 3.0',when:'Sun 13 Sep 2026 · 11 AM–3 PM',venue:'KL Wellness City, Bukit Jalil'},
-      zh:{name:'辣死你妈 3.0 · 广场舞体验日',when:'2026年9月13日 星期日 · 上午11点–下午3点',venue:'KL Wellness City, Bukit Jalil'}}
+  /* Real weekly timetable (from the intake posters). day: 0=Sun … 6=Sat; end null = not on the poster. */
+  var CLASSES=[
+    {day:1,start:'09:30',end:'11:00',en:['Square Dance · Bandar Puteri','Tip Tap Toe Fitness Studio · Ann Soh & Wendy Loh'],zh:['广场舞 · Bandar Puteri','Tip Tap Toe Fitness Studio · 猫妹 Ann Soh & 猫姐 Wendy']},
+    {day:3,start:'08:00',end:'09:30',en:['Square Dance · Cheras','Komune Living, Tasik Permaisuri · Wendy Loh & Adelyn Pong'],zh:['广场舞 · 蕉赖','Komune Living, Tasik Permaisuri · 猫姐 Wendy & Adelyn Pong']},
+    {day:4,start:'09:00',end:null,en:['Square Dance · Kajang','Kajang Hokkien Association · Jane Tang'],zh:['广场舞 · 加影','加影福建会馆 · Jane Tang 老师']},
+    {day:4,start:'19:00',end:'20:30',en:['Square Dance · Putra Prima','X2 Residency sky lounge · Wiwien Loh & Ann Soh'],zh:['广场舞 · Putra Prima','X2 Residency 空中会所 · Wiwien Loh & Ann Soh']},
+    {day:5,start:'18:00',end:'19:30',en:['Square Dance · Seri Kembangan','Dewan Dr. George Lim Ah Soo · Melvin Tan & Wendy Loh'],zh:['广场舞 · Seri Kembangan','Dewan Dr. George Lim Ah Soo · 猫哥 Melvin & Wendy']},
+    {day:6,start:'09:00',end:'10:30',en:['Square Dance · OUG (Beginner)','Dewan Komuniti OUG · Wendy Loh & Rowena Hu'],zh:['广场舞 · OUG（初级）','华联会所 · Wendy Loh & Rowena Hu']},
+    {day:6,start:'10:30',end:'12:00',en:['Square Dance · OUG (Intermediate)','Dewan Komuniti OUG · Wendy Loh & Rowena Hu'],zh:['广场舞 · OUG（中级）','华联会所 · Wendy Loh & Rowena Hu']}
   ];
-  /* Home area column of Melvin's lists (Wendy's notebooks have no area column). */
-  var AREAS=[
-    {en:'Puchong',zh:'蒲种',n:[24,19,1]},
-    {en:'Mahkota',zh:'Mahkota',n:[18,15,2]},
-    {en:'Ampang',zh:'安邦',n:[0,15,15]},
-    {en:'BT 11',zh:'BT 11',n:[5,12,9]},
-    {en:'Bahau / Seremban',zh:'马口 / 芙蓉',n:[0,16,0]},
-    {en:'OUG',zh:'OUG',n:[0,8,8]},
-    {en:'Taman Desa',zh:'Taman Desa',n:[0,9,0]},
-    {en:'Kelantan',zh:'吉兰丹',n:[2,0,3]},
-    {en:'Sungai Besar',zh:'双溪比力',n:[0,5,0]},
-    {en:'Klang',zh:'巴生',n:[4,0,0]},
-    {en:'Johor',zh:'柔佛',n:[0,3,0]},
-    {en:'Kepong',zh:'甲洞',n:[0,2,0]},
-    {en:'Muar',zh:'麻坡',n:[0,1,0]}
-  ];
-  var NO_AREA=[0,34,31];
-
+  var TEACHERS=7, VENUES=6, AREAS=4, EVENT_REG=472;
+  var ICONS={
+    cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6.3"/></svg>',
+    pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+    star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>',
+    qr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="13" width="4" height="4"/></svg>',
+    plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg>',
+    cash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>',
+    chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16v-4M12 16V8M17 16v-7"/></svg>',
+    mega:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1Z"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg>',
+    bag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l1 14H5z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>',
+    tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+    list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>'
+  };
+  var TINT={pink:['#FFE3EF','#C02F7A'],violet:['#EDE7FE','#6D4BD8'],blue:['#E3EDFD','#2563EB'],green:['#E3F6EE','#14804F'],amber:['#FEF3C7','#B45309'],peach:['#FFE9DE','#C2410C']};
   var T={
-    en:{role:'Admin · Wendy',title:'Nasi Lemak Workshop series',lede:'Registrations from the three Nasi Lemak square dance workshops, counted from Wendy’s notebook lists and Melvin’s printed lists.',
-      heroK:'Total registrations',heroD:'across 3 workshops, Jun – Sep 2026',
-      k1:'Workshops held',k2:'Biggest workshop',k3:'Est. ticket income',k4:'Home areas reached',
-      k1s:'1.0 · 2.0 · 3.0',k2s:'registrations',k3s:'registrations × ticket price',k4s:'from Melvin’s lists',
-      table:'Table',chart:'Chart',
-      c1Title:'Registrations per workshop',c1Sub:'Split by whose list the person signed up on',
-      wendy:'Wendy’s list',melvin:'Melvin’s list',total:'Total',event:'Workshop',
-      c2Title:'Where participants come from',c2Sub:'{a} of {b} people on Melvin’s lists have a home area written. {c} have none.',area:'Area',people:'People',
-      c3Title:'Each workshop',c3Sub:'Ticket income is an estimate: names on the lists × ticket price. Not every name is marked as paid.',
-      price:'Ticket price',income:'Est. income',per:'per person',vs:'vs previous',
-      note:'<b>How these numbers were made.</b> Every numbered line on the 2026 lists was counted, including ditto lines for extra tickets and the teachers who signed up. Some handwriting is hard to read, so treat totals as close, not exact. The two lists may share a few people. Names and phone numbers are kept off this page because the site is public.'},
-    zh:{role:'管理后台 · Wendy',title:'辣死你妈 Nasi Lemak 系列活动',lede:'三场 Nasi Lemak 广场舞体验日的报名人数，根据 Wendy 的手写名单和 Melvin 的打印名单统计。',
-      heroK:'总报名人数',heroD:'3 场活动，2026年6月至9月',
-      k1:'已办活动',k2:'人数最多的一场',k3:'预计门票收入',k4:'学员来自的地区',
-      k1s:'1.0 · 2.0 · 3.0',k2s:'人报名',k3s:'报名人数 × 票价',k4s:'根据 Melvin 的名单',
-      table:'表格',chart:'图表',
-      c1Title:'每场活动报名人数',c1Sub:'按报名的名单区分',
-      wendy:'Wendy 的名单',melvin:'Melvin 的名单',total:'合计',event:'活动',
-      c2Title:'学员来自哪里',c2Sub:'Melvin 名单上的 {b} 人中，{a} 人写了地区，{c} 人没写。',area:'地区',people:'人数',
-      c3Title:'每场活动',c3Sub:'门票收入为估计：名单人数 × 票价。并非每个名字都已标记付款。',
-      price:'票价',income:'预计收入',per:'每人',vs:'比上一场',
-      note:'<b>数字怎么算的：</b>2026 年名单上每一行有编号的都算进去，包括多买票的重复行和报名的老师。部分手写字不易辨认，总数接近但不一定完全准确。两份名单可能有少数人重复。因为网站是公开的，名字和电话号码不放在这页。'}
+    en:{hello:'Good morning, Wendy',hello2:'Good afternoon, Wendy',hello3:'Good evening, Wendy',
+      heroK:'Today',classesToday:'{n} classes today',noneToday:'No class today',restDay:'Enjoy your rest day',
+      next:'Next: {t} · {c}',allDone:'All of today’s classes are done',
+      k1:'Classes a week',k2:'Teachers',k3:'Venues in {a} areas',k4:'Workshop sign-ups',
+      qaTitle:'Quick actions',qa:['Check-in','Add student','Payment','Announce','Classes','Workshop report','Shop','Pricing'],
+      todayTitle:'Today’s classes',allClasses:'All classes →',done:'Done',live:'On now',soon:'Later',
+      weekTitle:'This week',todoTitle:'To do',
+      todo:[['Set the fee for each class','Classes show “ask the teacher” until fees are added','tag','amber','classes.html'],
+            ['Put Nasi Lemak sign-ups into a private list','472 names are still on paper and photos','list','violet','events.html'],
+            ['Send the real shop products','The shop has 6 sample products','bag','pink','products.html'],
+            ['Start check-in at classes','Student numbers, attendance and money will show here after the first check-ins','qr','blue',null]],
+      foot:'Timetable from the 2026 intake posters. Money and student numbers appear once check-in and payments are recorded here.',
+      days:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],noClass:'No class',soonToast:'Coming soon',am:'AM',pm:'PM'},
+    zh:{hello:'早安，Wendy',hello2:'午安，Wendy',hello3:'晚上好，Wendy',
+      heroK:'今天',classesToday:'今天 {n} 堂课',noneToday:'今天没有课',restDay:'好好休息一下',
+      next:'下一堂：{t} · {c}',allDone:'今天的课都上完了',
+      k1:'每周课堂',k2:'老师',k3:'{a} 个地区的场地',k4:'体验日报名',
+      qaTitle:'快捷功能',qa:['扫码签到','新增学生','记录付款','发公告','课程','活动报告','商店','收费方案'],
+      todayTitle:'今日课程',allClasses:'全部课程 →',done:'已完成',live:'进行中',soon:'稍后',
+      weekTitle:'本周课表',todoTitle:'待办事项',
+      todo:[['为每堂课设定学费','课程页目前显示“请向老师询问”','tag','amber','classes.html'],
+            ['把 Nasi Lemak 报名名单整理成私人表格','472 个名字还在纸上和照片里','list','violet','events.html'],
+            ['提供商店的真实商品','商店目前是 6 个示范商品','bag','pink','products.html'],
+            ['开始在课堂扫码签到','开始签到后，学生人数、出席和收款会显示在这里','qr','blue',null]],
+      foot:'课表来自 2026 年招生海报。开始签到和记录付款后，收款与学生人数会显示在这里。',
+      days:['星期日','星期一','星期二','星期三','星期四','星期五','星期六'],noClass:'没有课',soonToast:'即将推出',am:'上午',pm:'下午'}
   };
   var st={lang:'en'};
   try{ if(localStorage.getItem('kld_lang')==='zh') st.lang='zh'; }catch(e){}
-  var fmt=function(n){ return n.toLocaleString('en-MY'); };
   function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
-  var tip=document.getElementById('tip');
-  function showTip(e,html){ tip.innerHTML=html; tip.hidden=false; var x=(e.clientX||0)+14, y=(e.clientY||0)+14; if(x+230>innerWidth) x=innerWidth-236; tip.style.left=x+'px'; tip.style.top=y+'px'; }
-  function hideTip(){ tip.hidden=true; }
-  function hover(node,html){
-    node.addEventListener('mousemove',function(e){ showTip(e,html()); });
-    node.addEventListener('mouseleave',hideTip);
-    node.addEventListener('click',function(e){ showTip(e,html()); setTimeout(hideTip,2200); });
-  }
+  function mins(hhmm){ var p=hhmm.split(':'); return +p[0]*60+ +p[1]; }
+  function hm(hhmm){ var p=hhmm.split(':'), h=+p[0]; return {t:((h+11)%12+1)+':'+p[1], ap:h<12?'am':'pm'}; }
+  function icon(name,tint){ var d=el('span','ic'); d.innerHTML=ICONS[name]; d.style.background=TINT[tint][0]; d.style.color=TINT[tint][1]; return d; }
+  var tt; function soon(e){ if(e) e.preventDefault(); var x=document.getElementById('toast'); x.textContent=T[st.lang].soonToast; x.hidden=false; clearTimeout(tt); tt=setTimeout(function(){x.hidden=true;},1600); }
 
   function render(){
-    var t=T[st.lang]; document.documentElement.lang=st.lang==='zh'?'zh':'en';
+    var t=T[st.lang], now=new Date(), wd=now.getDay(), nowM=now.getHours()*60+now.getMinutes();
+    document.documentElement.lang=st.lang==='zh'?'zh':'en';
     document.querySelectorAll('[data-t]').forEach(function(e){ e.textContent=t[e.getAttribute('data-t')]; });
     document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
-    document.getElementById('note').innerHTML=t.note;
+    document.querySelector('[data-t="hello"]').textContent = now.getHours()<12?t.hello:(now.getHours()<18?t.hello2:t.hello3);
+    document.getElementById('today').textContent = now.toLocaleDateString(st.lang==='zh'?'zh-CN':'en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-    var tot=EVENTS.map(function(e){ return e.wendy+e.melvin; });
-    var grand=tot.reduce(function(a,b){return a+b;},0);
-    var income=EVENTS.map(function(e,i){ return tot[i]*e.price; });
-    var incomeAll=income.reduce(function(a,b){return a+b;},0);
-    var big=tot.indexOf(Math.max.apply(null,tot));
-
-    document.getElementById('heroN').textContent=fmt(grand);
-    var hc=document.getElementById('heroChips'); hc.innerHTML='';
-    EVENTS.forEach(function(e,i){ hc.appendChild(el('span',null,e.id+' · '+tot[i])); });
+    var today=CLASSES.filter(function(c){return c.day===wd;});
+    function status(c){ var s=mins(c.start), e=c.end?mins(c.end):s+90; return nowM>=e?'done':(nowM>=s?'live':'soon'); }
+    document.getElementById('heroN').textContent = today.length ? t.classesToday.replace('{n}',today.length) : t.noneToday;
+    document.getElementById('heroD').textContent = today.length ? today.map(function(c){return c[st.lang][0].split(' · ').slice(1).join(' · ');}).join('  ·  ') : t.restDay;
+    var nx=today.filter(function(c){return status(c)!=='done';})[0], hn=document.getElementById('heroNext');
+    if(today.length){ hn.hidden=false; if(nx){ var h=hm(nx.start); hn.textContent=t.next.replace('{t}',h.t+' '+t[h.ap]).replace('{c}',nx[st.lang][0].split(' · ').pop()); } else hn.textContent=t.allDone; } else hn.hidden=true;
 
     var K=document.getElementById('kpis'); K.innerHTML='';
-    [[t.k1,'3',t.k1s],[t.k2,EVENTS[big].id+' · '+tot[big],t.k2s],[t.k3,'RM'+fmt(incomeAll),t.k3s],[t.k4,String(AREAS.length),t.k4s]].forEach(function(k){
-      var d=el('div','kpi glass'); d.appendChild(el('div','t',k[0])); d.appendChild(el('div','v',k[1])); d.appendChild(el('div','s',k[2])); K.appendChild(d);
+    [[CLASSES.length,t.k1,'cal','pink','classes.html'],[TEACHERS,t.k2,'users','violet','./#teachers'],[VENUES,t.k3.replace('{a}',AREAS),'pin','blue','classes.html'],[EVENT_REG,t.k4,'star','amber','events.html']].forEach(function(k){
+      var a=el('a','kpi glass'); a.href=k[4]; a.appendChild(icon(k[2],k[3]));
+      var d=el('div'); d.appendChild(el('div','v',k[0])); d.appendChild(el('div','t',k[1])); a.appendChild(d); K.appendChild(a);
     });
 
-    /* chart 1: stacked columns */
-    var leg=document.getElementById('leg1'); leg.innerHTML='';
-    [['--s1',t.wendy],['--s2',t.melvin]].forEach(function(l){ var s=el('span'); var i=el('i'); i.style.background='var('+l[0]+')'; s.appendChild(i); s.appendChild(document.createTextNode(l[1])); leg.appendChild(s); });
-    var max=250, cols=document.getElementById('cols'); cols.innerHTML='';
-    [0,100,200].forEach(function(v){ var g=el('div','grid'); g.style.bottom=(v/max*200)+'px'; g.appendChild(el('span',null,v)); cols.appendChild(g); });
-    EVENTS.forEach(function(e,i){
-      var c=el('div','col'); c.appendChild(el('div','tot',tot[i]));
-      var h=200; /* px of plot under the label */
-      var top=el('div','seg top'); top.style.background='var(--s2)'; top.style.height=(e.melvin/max*h)+'px';
-      var bot=el('div','seg'); bot.style.background='var(--s1)'; bot.style.height=(e.wendy/max*h)+'px';
-      [top,bot].forEach(function(s){ hover(s,function(){ return '<b>'+e[st.lang].name+'</b>'+t.wendy+': '+e.wendy+'<br>'+t.melvin+': '+e.melvin+'<br>'+t.total+': '+tot[i]; }); });
-      c.appendChild(top); c.appendChild(bot); cols.appendChild(c);
+    var Q=document.getElementById('qa'); Q.innerHTML='';
+    [['qr','blue',null],['plus','green',null],['cash','amber',null],['mega','pink',null],['cal','violet','classes.html'],['chart','peach','events.html'],['bag','pink','products.html'],['tag','green',null]].forEach(function(q,i){
+      var a=q[2]?el('a'):el('button'); if(q[2]) a.href=q[2]; else { a.type='button'; a.addEventListener('click',soon); }
+      var tile=el('span','tile glass'); tile.innerHTML=ICONS[q[0]]; tile.style.color=TINT[q[1]][1];
+      tile.style.background='linear-gradient(165deg,'+TINT[q[1]][0]+',rgba(255,255,255,.7)) padding-box, var(--rim) border-box';
+      a.appendChild(tile); a.appendChild(document.createTextNode(t.qa[i])); Q.appendChild(a);
     });
-    var cl=document.getElementById('collabels'); cl.innerHTML='';
-    EVENTS.forEach(function(e){ var d=el('div'); d.appendChild(el('b',null,e.id)); d.appendChild(el('span',null,e[st.lang].when.split(' · ')[0])); cl.appendChild(d); });
-    var tb1='<table><thead><tr><th>'+t.event+'</th><th>'+t.wendy+'</th><th>'+t.melvin+'</th><th>'+t.total+'</th></tr></thead><tbody>'+
-      EVENTS.map(function(e,i){ return '<tr><td>'+e.id+'</td><td>'+e.wendy+'</td><td>'+e.melvin+'</td><td><b>'+tot[i]+'</b></td></tr>'; }).join('')+
-      '<tr><td><b>'+t.total+'</b></td><td>'+EVENTS.reduce(function(a,e){return a+e.wendy;},0)+'</td><td>'+EVENTS.reduce(function(a,e){return a+e.melvin;},0)+'</td><td><b>'+grand+'</b></td></tr></tbody></table>';
-    document.getElementById('table1').innerHTML=tb1;
 
-    /* chart 2: horizontal bars, sorted */
-    var rows=AREAS.map(function(a){ return {a:a,n:a.n[0]+a.n[1]+a.n[2]}; }).sort(function(x,y){ return y.n-x.n; });
-    var withArea=rows.reduce(function(s,r){return s+r.n;},0), none=NO_AREA.reduce(function(a,b){return a+b;},0);
-    document.getElementById('c2Sub').textContent=t.c2Sub.replace('{a}',withArea).replace('{b}',withArea+none).replace('{c}',none);
-    var B=document.getElementById('bars'); B.innerHTML=''; var top=rows[0].n;
-    rows.forEach(function(r){
-      var row=el('div','bar'); row.appendChild(el('span','lab',r.a[st.lang]));
-      var trk=el('span','trk'); var f=el('span','fill'); f.style.width=Math.max(2,r.n/top*100)+'%'; f.style.display='block'; trk.appendChild(f); row.appendChild(trk);
-      row.appendChild(el('span','val',r.n));
-      hover(row,function(){ return '<b>'+r.a[st.lang]+'</b>1.0: '+r.a.n[0]+' · 2.0: '+r.a.n[1]+' · 3.0: '+r.a.n[2]; });
-      B.appendChild(row);
+    document.getElementById('todayTitle').textContent=t.todayTitle+' · '+today.length;
+    var L=document.getElementById('todayList'); L.innerHTML='';
+    if(!today.length) L.appendChild(el('div','empty',t.noneToday));
+    today.forEach(function(c){
+      var r=el('div','row'), h=hm(c.start), tm=el('div','time'); tm.appendChild(el('b',null,h.t)); tm.appendChild(el('span',null,t[h.ap])); r.appendChild(tm);
+      var d=el('div','cls'); d.appendChild(el('b',null,c[st.lang][0])); d.appendChild(el('span',null,c[st.lang][1])); r.appendChild(d);
+      var s=status(c); r.appendChild(el('span','st '+s,t[s])); L.appendChild(r);
     });
-    document.getElementById('table2').innerHTML='<table><thead><tr><th>'+t.area+'</th><th>1.0</th><th>2.0</th><th>3.0</th><th>'+t.people+'</th></tr></thead><tbody>'+
-      rows.map(function(r){ return '<tr><td>'+r.a[st.lang]+'</td><td>'+r.a.n[0]+'</td><td>'+r.a.n[1]+'</td><td>'+r.a.n[2]+'</td><td><b>'+r.n+'</b></td></tr>'; }).join('')+'</tbody></table>';
 
-    /* event cards */
-    var E=document.getElementById('events'); E.innerHTML='';
-    EVENTS.forEach(function(e,i){
-      var d=e[st.lang], c=el('div','ev glass');
-      c.appendChild(el('span','tag',e.id));
-      c.appendChild(el('h3',null,d.name));
-      c.appendChild(el('p','meta',d.when+' · '+d.venue));
-      var dl=el('dl');
-      function row(k,v,cls,dot){ var dt=el('dt'); if(dot){ var s=el('span','dot'); s.style.background='var('+dot+')'; dt.appendChild(s); } dt.appendChild(document.createTextNode(k)); dl.appendChild(dt); dl.appendChild(el('dd',cls||null,v)); }
-      row(t.wendy,e.wendy,null,'--s1');
-      row(t.melvin,e.melvin,null,'--s2');
-      row(t.total,tot[i],'big');
-      if(i>0){ var diff=tot[i]-tot[i-1]; row(t.vs,(diff>0?'+':'')+diff); }
-      var r=el('div','rule'); dl.appendChild(r);
-      row(t.price,'RM'+e.price+' '+t.per);
-      row(t.income,'≈ RM'+fmt(income[i]),'big');
-      c.appendChild(dl); E.appendChild(c);
+    var W=document.getElementById('week'); W.innerHTML='';
+    [1,2,3,4,5,6,0].forEach(function(dn){
+      var list=CLASSES.filter(function(c){return c.day===dn;});
+      var r=el('div','day'); r.appendChild(el('div','dn'+(dn===wd?' today':''),t.days[dn]));
+      var ds=el('div','ds');
+      if(!list.length) ds.appendChild(el('span',null,t.noClass));
+      list.forEach(function(c){ var h=hm(c.start); ds.appendChild(el('div',null,h.t+' '+t[h.ap]+' · '+c[st.lang][0].split(' · ').slice(1).join(' · '))); });
+      r.appendChild(ds); W.appendChild(r);
     });
-    setTog('tog1','chart1','table1'); setTog('tog2','bars','table2');
+
+    var D=document.getElementById('todo'); D.innerHTML='';
+    t.todo.forEach(function(x){
+      var a=x[4]?el('a','todo'):el('div','todo'); if(x[4]) a.href=x[4];
+      a.appendChild(icon(x[2],x[3])); var d=el('div'); d.appendChild(el('b',null,x[0])); d.appendChild(el('span',null,x[1])); a.appendChild(d);
+      if(x[4]) a.appendChild(el('i',null,'›')); D.appendChild(a);
+    });
     try{ localStorage.setItem('kld_lang',st.lang); }catch(e){}
   }
-  var showTable={tog1:false,tog2:false};
-  function setTog(btn,chart,table){
-    var b=document.getElementById(btn), on=showTable[btn];
-    document.getElementById(chart).hidden=on; document.getElementById(table).hidden=!on;
-    b.textContent=on?T[st.lang].chart:T[st.lang].table; b.setAttribute('aria-pressed',on);
-  }
-  ['tog1','tog2'].forEach(function(id){ document.getElementById(id).addEventListener('click',function(){ showTable[id]=!showTable[id]; setTog(id,id==='tog1'?'chart1':'bars',id==='tog1'?'table1':'table2'); }); });
   document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click',function(){ st.lang=b.dataset.lang; render(); }); });
   render();
 })();
