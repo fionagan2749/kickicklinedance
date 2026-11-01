@@ -5,7 +5,11 @@
   var URL='https://ouhvglgfekdiejnjqxbc.supabase.co';
   /* public (publishable) key: safe in the browser, every table is locked by row-level security */
   var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91aHZnbGdmZWtkaWVqbmpxeGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODM4NzEsImV4cCI6MjEwODg1OTg3MX0.reiTSKw9DkvY_RWAaUmoae-RBruF8_wW7oz64LPgm6Q';
-  var sb = window.KLD_MOCK ? window.KLD_MOCK : window.supabase.createClient(URL, KEY);
+  /* Temporary team passcode (instead of email login): kept on this device and sent with every request
+     as header x-kld-pass; the database checks it, the page never knows the right answer. */
+  var PASS=''; try{ PASS=localStorage.getItem('kld_pass')||''; }catch(e){}
+  function passFetch(url,opts){ opts=opts||{}; var h=new Headers(opts.headers||{}); if(PASS) h.set('x-kld-pass',PASS); opts.headers=h; return fetch(url,opts); }
+  var sb = window.KLD_MOCK ? window.KLD_MOCK : window.supabase.createClient(URL, KEY, {global:{fetch:passFetch}});
 
   var lang='en', langFns=[];
   try{ if(localStorage.getItem('kld_lang')==='zh') lang='zh'; }catch(e){}
@@ -50,9 +54,12 @@
   };
   function icon(n){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(I[n]||'')+'</svg>'; }
 
-  /* ---- admin sign-in gate (email link; only emails on the admins list see any data) ---- */
+  /* ---- admin gate: team passcode for now (email-link login comes back at launch) ---- */
   var G={
     title:['Admin sign in','管理员登录'],
+    psub:['Enter the team passcode. This phone remembers it.','输入团队密码，这部手机会记住。'],
+    pass:['Passcode','密码'], enter:['Enter','进入'], wrong:['Wrong passcode. Try again.','密码不对，请再试。'],
+    lock:['Lock this device','锁上这部设备'],
     sub:['Enter your email. We send you a sign-in link.','输入电邮，我们会寄登录链接给你。'],
     email:['Your email','你的电邮'],
     send:['Email me the link','寄登录链接'],
@@ -95,8 +102,27 @@
         else { state='notadmin'; draw(); }
       });
     }
-    sb.auth.getSession().then(function(r){ check(r.data.session); });
-    sb.auth.onAuthStateChange(function(ev,session){ if(ev==='SIGNED_IN') check(session); if(ev==='SIGNED_OUT') location.reload(); });
+    if(window.KLD_MOCK){ sb.auth.getSession().then(function(r){ check(r.data.session); }); return; }
+    /* passcode mode */
+    function passForm(err){
+      g.innerHTML='<div class="card glass"><img src="app-logo.png" alt=""><h1>'+gT('title')+'</h1><p>'+gT('psub')+'</p><form id="pf" style="display:flex;flex-direction:column;gap:10px"><label class="field" style="text-align:left"><span>'+gT('pass')+'</span><input class="inp" type="password" id="pp" required autocomplete="current-password"></label>'+
+        (err?'<p style="color:var(--bad);font-weight:700">'+gT('wrong')+'</p>':'')+'<button class="btn cta" style="justify-content:center">'+gT('enter')+'</button></form></div>';
+      var inp=g.querySelector('#pp'); inp.focus();
+      g.querySelector('#pf').addEventListener('submit',function(e){ e.preventDefault(); PASS=inp.value.trim().toLowerCase(); tryPass(true); });
+    }
+    function tryPass(fromForm){
+      sb.rpc('is_admin').then(function(r){
+        if(r.data===true){ try{ localStorage.setItem('kld_pass',PASS); }catch(e){} g.remove(); passIn(); if(!started){ started=true; onReady(); } }
+        else { PASS=''; try{ localStorage.removeItem('kld_pass'); }catch(e){} passForm(fromForm); }
+      });
+    }
+    langFns.push(function(){ if(document.body.contains(g)) passForm(false); });
+    if(PASS) tryPass(false); else passForm(false);
+  }
+  function passIn(){
+    var slot=document.getElementById('me'); if(!slot) return;
+    slot.innerHTML='<button class="who-pill" type="button" id="so">🔓 '+gT('lock')+'</button>';
+    slot.querySelector('#so').addEventListener('click',function(){ try{ localStorage.removeItem('kld_pass'); }catch(e){} location.reload(); });
   }
   /* small "signed in as … · Sign out" pill under the header */
   function signedIn(email){
