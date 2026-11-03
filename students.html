@@ -9,7 +9,25 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="kld-admin.css">
-<!-- Layout: Wendy's contact book. Search on top → 4 numbers → filter chips → people list (repeat attendees first). Tap a person = sheet with WhatsApp, event history, edit, same-phone merge. -->
+<!-- Layout: Wendy's contact book. Search on top → 4 numbers → filter chips + "Sort by" → A–Z jump bar → one-line rows
+     (name, phone · area, event tags 1.0/2.0/3.0, WhatsApp button) grouped under headers. Tap a name = sheet with history, edit, same-phone merge. -->
+<style>
+.list{gap:6px}
+.row{padding:8px 10px 8px 12px;gap:10px}
+.rowmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:transparent;text-align:left;padding:2px 0;cursor:pointer}
+.rowmain .av{width:38px;height:38px;font-size:14px;border-radius:12px}
+.evs{display:flex;gap:4px;flex-shrink:0}
+.wa{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;text-decoration:none;font-weight:800;font-size:13px;color:#fff;background:#25A55F;border-radius:999px;padding:8px 12px}
+.wa svg{width:16px;height:16px}
+.wa.off{background:rgba(107,102,136,.12);color:var(--muted);pointer-events:none}
+.grp{display:flex;justify-content:space-between;align-items:baseline;margin:14px 4px 2px;font-weight:800;font-size:14px;scroll-margin-top:84px}
+.grp span{font-size:12.5px;color:var(--muted);font-weight:700}
+.az{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 6px}
+.az button{border:0;background:rgba(255,255,255,.75);border-radius:9px;min-width:30px;height:30px;font-weight:800;font-size:13px;color:var(--ink)}
+.az button:hover{background:var(--ink);color:#fff}
+@media (max-width:560px){.evs .tag{padding:2px 7px}.wa span{display:none}.wa{padding:9px}}
+select.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);color:var(--ink)}
+</style>
 </head>
 <body>
 <div class="app">
@@ -37,8 +55,8 @@
         <button class="btn ghost" id="csv" type="button"></button>
       </div>
     </div>
+    <nav class="az" id="az" aria-label="Jump to letter"></nav>
     <div class="list" id="list"></div>
-    <div style="text-align:center;margin-top:12px"><button class="btn soft" id="more" type="button" hidden></button></div>
   </section>
 </div>
 
@@ -55,8 +73,11 @@
     kicker:['Students','学生'], title:['Everyone who joined us','所有来过的学员'],
     ph:['Search name, phone or area','搜名字、电话或地区'],
     total:['people','人'], rep:['came 2+ times','来过 2 次以上'], all3:['came to every event','每场都来'], withph:['have a phone no.','有电话'],
-    f_all:['All','全部'], f_rep:['Repeat 2+','回头客 2+'], f_new:['Came once','只来过一次'], f_noph:['No phone','没电话'], f_dup:['Same phone','同一电话'],
-    s_events:['Most events','来最多次'], s_name:['Name A–Z','名字 A–Z'], s_recent:['Most recent','最近来过'],
+    f_all:['All','全部'], f_times:['Times came: any','来过几次：全部'], f_t1:['Came 1 time','来过 1 次'], f_tn:['Came %n times','来过 %n 次'], f_t0:['No event yet','还没来过'], f_rep:['Came 2+ times (repeat)','来过 2 次以上（回头客）'], f_noph:['No phone','没电话'], f_dup:['Same phone','同一电话'],
+    s_events:['Sort: most events','排序：来最多次'], s_name:['Sort: name A–Z','排序：名字 A–Z'], s_recent:['Sort: most recent','排序：最近来过'],
+    s_teacher:['Sort: by teacher','排序：按老师'], s_ref:['Sort: referred by','排序：按介绍人'],
+    own:['Came on their own','自己来的'], noTeacher:['No teacher yet','未填老师'], timesN:['Came %n times','来过 %n 次'], once:['Came once','来过一次'], never:['No event yet','还没参加活动'],
+    teacher:['Teacher','老师'], refBy:['Referred / booked by','介绍人 / 订票人'], people2:['people','人'],
     area:['All areas','全部地区'],
     shown:['%n of %t shown','显示 %n / %t'], add:['Add','新增'], csv:['Export','导出'], more:['Show more','显示更多'],
     none:['Nobody matches. Try a shorter word.','找不到，试短一点的字。'],
@@ -71,7 +92,7 @@
     first:['First time','第一次'], err:['Something went wrong. Try again.','出错了，请再试。']
   };
   function t(k){ return T[k][K.lang()==='zh'?1:0]; }
-  var ALL=[], EVENTS=[], view={q:'',f:'all',sort:'events',area:'',limit:60};
+  var ALL=[], EVENTS=[], view={q:'',f:'all',sort:'name',area:'',times:''};
 
   document.getElementById('sic').innerHTML=K.icon('search');
 
@@ -95,6 +116,8 @@
     if((c.name||'').toLowerCase().indexOf(ql)>=0) return true;
     if((c.area||'').toLowerCase().indexOf(ql)>=0) return true;
     if((c.notes||'').toLowerCase().indexOf(ql)>=0) return true;
+    if((c.teacher||'').toLowerCase().indexOf(ql)>=0) return true;
+    if(c.referred_by.join(' ').toLowerCase().indexOf(ql)>=0) return true;
     if(d.length>=3 && c.phone){ var core=d.replace(/^60?/,''); if(c.phone.indexOf(core)>=0) return true; }
     return false;
   }
@@ -102,19 +125,31 @@
     var list=ALL.filter(function(c){
       if(!match(c,view.q)) return false;
       if(view.area && c.area!==view.area) return false;
-      if(view.f==='rep') return c.events_count>=2;
-      if(view.f==='new') return c.events_count<=1;
+      if(view.times==='2+' && c.events_count<2) return false;
+      if(view.times!=='' && view.times!=='2+' && c.events_count!==+view.times) return false;
       if(view.f==='noph') return !c.phone;
       if(view.f==='dup') return c.same_phone>0;
       if(view.f.indexOf('ev:')===0) return c.event_codes.indexOf(view.f.slice(3))>=0;
       return true;
     });
+    var byName=function(a,b){ return a.name.localeCompare(b.name); };
     list.sort(function(a,b){
-      if(view.sort==='name') return a.name.localeCompare(b.name);
+      if(view.sort==='name') return letter(a).localeCompare(letter(b)) || byName(a,b);
       if(view.sort==='recent') return String(b.last_event||'').localeCompare(String(a.last_event||'')) || b.events_count-a.events_count;
-      return b.events_count-a.events_count || b.tickets_total-a.tickets_total || a.name.localeCompare(b.name);
+      if(view.sort==='teacher'||view.sort==='ref'){ var ga=group(a), gb=group(b); return (ga.last-gb.last) || ga.key.localeCompare(gb.key) || byName(a,b); }
+      return b.events_count-a.events_count || b.tickets_total-a.tickets_total || byName(a,b);
     });
     return list;
+  }
+  /* A–Z header letter; Chinese-only names go under 中, others under # */
+  function letter(c){ var n=String(c.name||'').replace(/[^A-Za-z一-鿿]/g,''); var ch=(n.match(/[A-Za-z]/)||[])[0]; return ch?ch.toUpperCase():(/[一-鿿]/.test(n)?'中':'#'); }
+  /* header for each sort; last=1 pushes "no teacher" / "came on their own" to the bottom */
+  function group(c){
+    if(view.sort==='name') return {key:letter(c),label:letter(c),last:0};
+    if(view.sort==='teacher') return c.teacher?{key:c.teacher,label:t('teacher')+': '+c.teacher,last:0}:{key:'',label:t('noTeacher'),last:1};
+    if(view.sort==='ref') return c.referred_by.length?{key:c.referred_by[0],label:t('refBy')+': '+c.referred_by.join(', '),last:0}:{key:'',label:t('own'),last:1};
+    if(view.sort==='events'){ var n=c.events_count; return {key:String(9-n),label:n>1?t('timesN').replace('%n',n):(n===1?t('once'):t('never')),last:0}; }
+    return null;
   }
 
   function render(){
@@ -123,41 +158,76 @@
     document.getElementById('stats').innerHTML=
       stat(ALL.length,t('total'))+stat(rep,t('rep'))+stat(all3,t('all3'))+stat(ALL.filter(function(c){return c.phone;}).length,t('withph'));
     var areas={}; ALL.forEach(function(c){ if(c.area) areas[c.area]=(areas[c.area]||0)+1; });
-    var ch=[['all','f_all'],['rep','f_rep'],['new','f_new']].map(function(f){ return chip(f[0],t(f[1])); }).join('');
+    var ch=chip('all',t('f_all')).replace('aria-pressed="true"','aria-pressed="'+(!view.times&&!view.area)+'"');
+    /* "Times came" picker: Wendy chooses 1, 2, 3 … (counts in brackets) */
+    var tc={}, maxT=0; ALL.forEach(function(c){ tc[c.events_count]=(tc[c.events_count]||0)+1; if(c.events_count>maxT) maxT=c.events_count; });
+    var topt='<option value="">'+t('f_times')+'</option>';
+    for(var n=tc[0]?0:1;n<=maxT;n++) if(tc[n]) topt+='<option value="'+n+'"'+(view.times===String(n)?' selected':'')+'>'+(n===0?t('f_t0'):n===1?t('f_t1'):t('f_tn').replace('%n',n))+' ('+tc[n]+')</option>';
+    if(maxT>=2) topt+='<option value="2+"'+(view.times==='2+'?' selected':'')+'>'+t('f_rep')+' ('+ALL.filter(function(c){return c.events_count>=2;}).length+')</option>';
+    ch+='<select class="chip'+(view.times?' on':'')+'" id="times" aria-label="Times came">'+topt+'</select>';
     EVENTS.forEach(function(e){ ch+=chip('ev:'+e.code, e.code.replace(/^NL(\d)$/,'Nasi Lemak $1.0')); });
     ch+=chip('dup',t('f_dup'))+chip('noph',t('f_noph'));
     ch+='<select class="chip" id="area" aria-label="Area"><option value="">'+t('area')+'</option>'+Object.keys(areas).sort().map(function(a){ return '<option'+(a===view.area?' selected':'')+' value="'+esc(a)+'">'+esc(a)+' ('+areas[a]+')</option>'; }).join('')+'</select>';
-    ch+='<select class="chip" id="sort" aria-label="Sort">'+['events','recent','name'].map(function(s){ return '<option value="'+s+'"'+(s===view.sort?' selected':'')+'>'+t('s_'+s)+'</option>'; }).join('')+'</select>';
+    ch+='<select class="chip" id="sort" aria-label="Sort">'+['name','teacher','ref','events','recent'].map(function(s){ return '<option value="'+s+'"'+(s===view.sort?' selected':'')+'>'+t('s_'+s)+'</option>'; }).join('')+'</select>';
     var cEl=document.getElementById('chips'); cEl.innerHTML=ch;
-    cEl.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ view.f=b.dataset.f; view.limit=60; render(); }); });
-    cEl.querySelector('#area').addEventListener('change',function(){ view.area=this.value; view.limit=60; render(); });
+    cEl.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ view.f=b.dataset.f; if(view.f==='all'){ view.times=''; view.area=''; } render(); }); });
+    cEl.querySelector('#area').addEventListener('change',function(){ view.area=this.value; render(); });
+    cEl.querySelector('#times').addEventListener('change',function(){ view.times=this.value; render(); });
     cEl.querySelector('#sort').addEventListener('change',function(){ view.sort=this.value; render(); });
 
-    var list=filtered(), shown=list.slice(0,view.limit);
+    var list=filtered();
     document.getElementById('cnt').textContent=t('shown').replace('%n',list.length).replace('%t',ALL.length);
     document.getElementById('add').innerHTML=K.icon('plus')+t('add');
     document.getElementById('csv').innerHTML=K.icon('dl')+t('csv');
+    /* rows under group headers (all rows drawn: ~350 is light enough) */
+    var h='', cur=null, counts={}, letters=[];
+    list.forEach(function(c){ var g=group(c); if(g) counts[g.label]=(counts[g.label]||0)+1; });
+    list.forEach(function(c){
+      var g=group(c);
+      if(g && g.label!==cur){ cur=g.label; if(view.sort==='name') letters.push(g.label); h+='<div class="grp" id="g-'+esc(g.label)+'">'+esc(g.label)+'<span>'+counts[g.label]+' '+t('people2')+'</span></div>'; }
+      h+=rowHtml(c);
+    });
     var L=document.getElementById('list');
-    L.innerHTML = shown.length ? shown.map(rowHtml).join('') : '<div class="empty glass">'+t('none')+'</div>';
+    L.innerHTML = list.length ? h : '<div class="empty glass">'+t('none')+'</div>';
     L.querySelectorAll('[data-id]').forEach(function(b){ b.addEventListener('click',function(){ openPerson(+b.dataset.id); }); });
-    var m=document.getElementById('more'); m.hidden=list.length<=view.limit; m.textContent=t('more')+' ('+(list.length-view.limit)+')';
+    var az=document.getElementById('az');
+    az.hidden=!letters.length;
+    az.innerHTML=letters.map(function(l){ return '<button type="button" data-l="'+esc(l)+'">'+esc(l)+'</button>'; }).join('');
+    az.querySelectorAll('[data-l]').forEach(function(b){ b.addEventListener('click',function(){ var el=document.getElementById('g-'+b.dataset.l); if(el) el.scrollIntoView({behavior:'smooth'}); }); });
   }
+  function teacherNames(){ var s={'Wendy':1,'Melvin':1}; ALL.forEach(function(c){ if(c.teacher) s[c.teacher]=1; }); return Object.keys(s).sort(); }
   function stat(v,l){ return '<div class="stat glass"><div class="v">'+v+'</div><div class="t">'+l+'</div></div>'; }
   function chip(f,label){ return '<button type="button" class="chip" data-f="'+f+'" aria-pressed="'+(view.f===f)+'">'+esc(label)+'</button>'; }
   function evTag(code){ return '<span class="tag ev">'+esc(code.replace(/^NL(\d)$/,'$1.0'))+'</span>'; }
+  /* one line: name / phone · area · teacher, then the events they came to, then WhatsApp */
   function rowHtml(c){
-    var badge = c.events_count>=2 ? '<span class="tag rep">×'+c.events_count+' '+t('events')+'</span>' : (c.events_count===1?'<span class="tag plain">'+t('first')+'</span>':'');
-    return '<button type="button" class="row glass" data-id="'+c.id+'"><span class="av">'+esc(K.initials(c.name))+'</span><span class="main"><span class="nm">'+esc(c.name)+'</span>'+
-      '<span class="sub">'+[c.phone?K.showPhone(c.phone):'',c.area].filter(Boolean).map(esc).join(' · ')+(c.same_phone?' <span class="tag warn">'+t('f_dup')+'</span>':'')+'</span></span>'+
-      '<span class="end">'+badge+'<span style="display:flex;gap:3px">'+c.event_codes.map(evTag).join('')+'</span></span></button>';
+    var sub=[c.phone?K.showPhone(c.phone):'',c.area,view.sort==='teacher'?'':c.teacher].filter(Boolean).map(esc).join(' · ');
+    var wa=c.phone?'<a class="wa" href="'+K.wa(c.phone,'Hi '+c.name.replace(/\(.*?\)/g,'').trim()+', ')+'" target="_blank" rel="noopener" aria-label="WhatsApp '+esc(c.name)+'">'+K.icon('wa')+'<span>WhatsApp</span></a>'
+                  :'<span class="wa off" aria-hidden="true">'+K.icon('wa')+'</span>';
+    return '<div class="row glass"><button type="button" class="rowmain" data-id="'+c.id+'"><span class="av">'+esc(K.initials(c.name))+'</span><span class="main"><span class="nm">'+esc(c.name)+'</span>'+
+      '<span class="sub">'+sub+'</span></span></button><span class="evs">'+c.event_codes.map(evTag).join('')+'</span>'+wa+'</div>';
   }
 
-  document.getElementById('q').addEventListener('input',function(){ view.q=this.value.trim(); view.limit=60; render(); });
-  document.getElementById('more').addEventListener('click',function(){ view.limit+=100; render(); });
+  document.getElementById('q').addEventListener('input',function(){ view.q=this.value.trim(); render(); });
   document.getElementById('csv').addEventListener('click',function(){
-    var rows=[['Name','Phone','Area','Events','Event codes','Tickets','Notes']].concat(filtered().map(function(c){ return [c.name,c.phone||'',c.area||'',c.events_count,c.event_codes.join(' '),c.tickets_total,c.notes||'']; }));
-    var csv='﻿'+rows.map(function(r){ return r.map(function(v){ v=String(v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }).join(','); }).join('\n');
-    var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='kickick-students.csv'; a.click();
+    /* real Excel file (what is on screen now, same order); SheetJS is loaded only when Export is pressed */
+    function build(){
+      var codes=EVENTS.map(function(e){ return e.code; });
+      var head=['Name','Phone','Area','Teacher'].concat(codes.map(function(c){ return c.replace(/^NL(\d)$/,'Nasi Lemak $1.0'); })).concat(['Times came','Tickets','Referred / booked by','Same phone as','Notes']);
+      var rows=filtered().map(function(c){
+        var same=c.phone?ALL.filter(function(o){ return o.phone===c.phone&&o.id!==c.id; }).map(function(o){ return o.name; }).join(', '):'';
+        return [c.name, c.phone?K.showPhone(c.phone):'', c.area||'', c.teacher||''].concat(codes.map(function(x){ return c.event_codes.indexOf(x)>=0?'✓':''; }))
+          .concat([c.events_count, c.tickets_total, c.referred_by.join(', '), same, c.notes||'']);
+      });
+      var ws=XLSX.utils.aoa_to_sheet([head].concat(rows));
+      ws['!cols']=head.map(function(h,i){ return {wch: i===0?26:(h==='Notes'||/Referred|Same/.test(h))?28:(i===1?15:12)}; });
+      ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:head.length-1}})};
+      var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Students');
+      XLSX.writeFile(wb,'KICKICK students '+new Date().toISOString().slice(0,10)+'.xlsx');
+    }
+    if(window.XLSX) return build();
+    var s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=build; s.onerror=function(){ K.toast(t('err')); }; document.head.appendChild(s);
   });
 
   /* ---- person sheet ---- */
@@ -178,7 +248,10 @@
       '<h4 style="margin:18px 0 8px">'+t('edit')+'</h4><form id="pf" style="display:flex;flex-direction:column;gap:10px">'+
       '<div class="grid2"><label class="field"><span>'+t('name')+'</span><input class="inp" name="name" required value="'+esc(c.name)+'"></label>'+
       '<label class="field"><span>'+t('phone')+'</span><input class="inp" name="phone" inputmode="tel" value="'+esc(c.phone?K.showPhone(c.phone):'')+'"></label></div>'+
-      '<label class="field"><span>'+t('areaL')+'</span><input class="inp" name="area" value="'+esc(c.area||'')+'"></label>'+
+      '<div class="grid2"><label class="field"><span>'+t('areaL')+'</span><input class="inp" name="area" value="'+esc(c.area||'')+'"></label>'+
+      '<label class="field"><span>'+t('teacher')+'</span><input class="inp" name="teacher" list="teachers" value="'+esc(c.teacher||'')+'"></label></div>'+
+      '<datalist id="teachers">'+teacherNames().map(function(n){ return '<option>'+esc(n)+'</option>'; }).join('')+'</datalist>'+
+      (c.referred_by.length?'<p class="small muted" style="margin:0">'+t('refBy')+': <b>'+esc(c.referred_by.join(', '))+'</b></p>':'')+
       '<label class="field"><span>'+t('notes')+'</span><textarea class="inp" name="notes">'+esc(c.notes||'')+'</textarea></label>'+
       '<div style="display:flex;gap:8px;justify-content:space-between"><button class="btn danger" type="button" id="del">'+K.icon('trash')+t('del')+'</button><button class="btn cta">'+t('save')+'</button></div></form>');
 
@@ -209,7 +282,7 @@
     });
     sheet.querySelector('#pf').addEventListener('submit',function(e){
       e.preventDefault(); var f=e.target;
-      var row={name:f.name.value.trim(), phone:K.normPhone(f.phone.value), area:f.area.value.trim()||null, notes:f.notes.value.trim()||null};
+      var row={name:f.name.value.trim(), phone:K.normPhone(f.phone.value), area:f.area.value.trim()||null, teacher:f.teacher.value.trim()||null, notes:f.notes.value.trim()||null};
       if(!row.name){ K.toast(t('needName')); return; }
       sb.from('contacts').update(row).eq('id',c.id).then(function(r){ if(r.error){ K.toast(t('err')); return; } K.toast(t('saved')); closeSheet(); load(); });
     });
