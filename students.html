@@ -27,6 +27,13 @@
 .az button:hover{background:var(--ink);color:#fff}
 @media (max-width:560px){.evs .tag{padding:2px 7px}.wa span{display:none}.wa{padding:9px}}
 select.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);color:var(--ink)}
+.av.ph{padding:0;overflow:hidden;background:#fff}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.avbtn{position:relative;cursor:pointer;flex-shrink:0;display:block}
+.avbtn .av{width:58px;height:58px;border-radius:18px;font-size:20px}
+.avbtn .cam{position:absolute;right:-5px;bottom:-5px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;border:2px solid #fff}
+.avbtn .cam svg{width:13px;height:13px}
+.rmph{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:700;color:var(--muted);text-decoration:underline;cursor:pointer}
 </style>
 </head>
 <body>
@@ -89,10 +96,10 @@ select.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);col
     merged:['Merged','已合并'], del:['Delete person','删除这个人'], delQ:['Delete %a and all their event records?','删除 %a 和所有活动记录？'],
     newT:['Add a student','新增学员'], create:['Add student','新增'], needName:['Please type a name','请输入名字'],
     by:['booked by','订票人'], paid:['paid','已付'], wl:["Wendy's list",'Wendy 名单'], ml:["Melvin's list",'Melvin 名单'], form:['Form','报名表格'], manual:['Added by hand','手动加入'],
-    first:['First time','第一次'], err:['Something went wrong. Try again.','出错了，请再试。']
+    first:['First time','第一次'], photo:['Tap the picture to add a photo','点头像加照片'], rmPhoto:['Remove photo','删除照片'], photoSaved:['Photo saved','照片已保存'], photoGone:['Photo removed','照片已删除'], err:['Something went wrong. Try again.','出错了，请再试。']
   };
   function t(k){ return T[k][K.lang()==='zh'?1:0]; }
-  var ALL=[], EVENTS=[], view={q:'',f:'all',sort:'name',area:'',times:''};
+  var ALL=[], EVENTS=[], PHOTOS={}, view={q:'',f:'all',sort:'name',area:'',times:''};
 
   document.getElementById('sic').innerHTML=K.icon('search');
 
@@ -106,6 +113,8 @@ select.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);col
     ]).then(function(r){
       if(r[0].error||r[1].error){ K.toast(t('err')); return; }
       ALL=r[0].data; EVENTS=r[1].data; render();
+      /* photos come after the list so the names show at once */
+      sb.from('contact_photos').select('contact_id,img').then(function(p){ if(p.error) return; PHOTOS={}; (p.data||[]).forEach(function(x){ PHOTOS[x.contact_id]=x.img; }); render(); });
     });
   }
 
@@ -200,11 +209,20 @@ select.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);col
   function chip(f,label){ return '<button type="button" class="chip" data-f="'+f+'" aria-pressed="'+(view.f===f)+'">'+esc(label)+'</button>'; }
   function evTag(code){ return '<span class="tag ev">'+esc(code.replace(/^NL(\d)$/,'$1.0'))+'</span>'; }
   /* one line: name / phone · area · teacher, then the events they came to, then WhatsApp */
+  /* teachers who are also in the list: their picture from the public Teachers section (until Wendy adds another) */
+  var TPICS={'Wendy Loh':'t-wendy.jpg','Ann Soh':'t-ann.jpg','Adelyn Pong':'t-adelyn.jpg','Jane Tang':'t-jane.jpg','Wiwien Loh':'t-wiwien.jpg','Rowena Hu':'t-rowena.jpg'};
+  /* photo if Wendy added one, else initials on the person's own colour */
+  function avatar(c){
+    var pic=PHOTOS[c.id]||TPICS[c.name];
+    if(pic) return '<span class="av ph"><img src="'+pic+'" alt="" loading="lazy"></span>';
+    var h=0, n=String(c.name||''); for(var i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))%360;
+    return '<span class="av" style="background:hsl('+h+',75%,90%);color:hsl('+h+',55%,32%)">'+esc(K.initials(c.name))+'</span>';
+  }
   function rowHtml(c){
     var sub=[c.phone?K.showPhone(c.phone):'',c.area,view.sort==='teacher'?'':c.teacher].filter(Boolean).map(esc).join(' · ');
     var wa=c.phone?'<a class="wa" href="'+K.wa(c.phone,'Hi '+c.name.replace(/\(.*?\)/g,'').trim()+', ')+'" target="_blank" rel="noopener" aria-label="WhatsApp '+esc(c.name)+'">'+K.icon('wa')+'<span>WhatsApp</span></a>'
                   :'<span class="wa off" aria-hidden="true">'+K.icon('wa')+'</span>';
-    return '<div class="row glass"><button type="button" class="rowmain" data-id="'+c.id+'"><span class="av">'+esc(K.initials(c.name))+'</span><span class="main"><span class="nm">'+esc(c.name)+'</span>'+
+    return '<div class="row glass"><button type="button" class="rowmain" data-id="'+c.id+'">'+avatar(c)+'<span class="main"><span class="nm">'+esc(c.name)+'</span>'+
       '<span class="sub">'+sub+'</span></span></button><span class="evs">'+c.event_codes.map(evTag).join('')+'</span>'+wa+'</div>';
   }
 
@@ -230,6 +248,19 @@ select.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);col
     s.onload=build; s.onerror=function(){ K.toast(t('err')); }; document.head.appendChild(s);
   });
 
+  /* any phone photo -> small square JPEG (about 10 KB) kept in the database */
+  function shrink(file,done){
+    var u=URL.createObjectURL(file), im=new Image();
+    im.onload=function(){
+      var S=192, cv=document.createElement('canvas'); cv.width=cv.height=S;
+      var m=Math.min(im.width,im.height);
+      cv.getContext('2d').drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,S,S);
+      URL.revokeObjectURL(u); done(cv.toDataURL('image/jpeg',0.8));
+    };
+    im.onerror=function(){ URL.revokeObjectURL(u); done(null); };
+    im.src=u;
+  }
+
   /* ---- person sheet ---- */
   var sheet=document.getElementById('sheet'), back=document.getElementById('back');
   function closeSheet(){ sheet.hidden=true; back.hidden=true; }
@@ -241,7 +272,7 @@ select.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);col
   function openPerson(id){
     var c=ALL.find(function(x){return x.id===id;}); if(!c) return;
     var same=c.phone?ALL.filter(function(x){ return x.phone===c.phone && x.id!==c.id; }):[];
-    openSheet('<div class="hd"><span class="av">'+esc(K.initials(c.name))+'</span><div style="flex:1;min-width:0"><h3>'+esc(c.name)+'</h3><div class="muted small">'+[c.phone?K.showPhone(c.phone):'',c.area].filter(Boolean).map(esc).join(' · ')+'</div></div><button class="x" type="button" aria-label="Close">'+K.icon('x')+'</button></div>'+
+    openSheet('<div class="hd"><label class="avbtn" aria-label="'+t('photo')+'"><span id="pav">'+avatar(c)+'</span><span class="cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><input type="file" accept="image/*" id="phin" hidden></label><div style="flex:1;min-width:0"><h3>'+esc(c.name)+'</h3><div class="muted small">'+[c.phone?K.showPhone(c.phone):'',c.area].filter(Boolean).map(esc).join(' · ')+'</div>'+(PHOTOS[c.id]?'<button type="button" class="rmph" id="rmph">'+t('rmPhoto')+'</button>':'<div class="muted small">'+t('photo')+'</div>')+'</div><button class="x" type="button" aria-label="Close">'+K.icon('x')+'</button></div>'+
       (c.phone?'<a class="btn cta" href="'+K.wa(c.phone,'Hi '+c.name.replace(/\(.*?\)/g,'').trim()+', ')+'" target="_blank" rel="noopener">'+K.icon('wa')+t('wa')+'</a>':'')+
       '<h4 style="margin:18px 0 4px">'+t('history')+'</h4><div class="hist" id="hist"><div class="muted">…</div></div>'+
       (same.length?'<h4 style="margin:18px 0 4px">'+t('same')+'</h4><p class="muted small" style="margin:0 0 6px">'+t('sameNote')+'</p><div class="hist">'+same.map(function(s){ return '<div style="display:flex;align-items:center;gap:8px"><span style="flex:1"><b>'+esc(s.name)+'</b> · '+s.events_count+' '+t('events')+'</span><button class="btn soft" type="button" data-merge="'+s.id+'" style="padding:7px 12px;font-size:13px">'+K.icon('merge')+t('merge')+'</button></div>'; }).join('')+'</div>':'')+
@@ -262,6 +293,22 @@ select.chip.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);col
         return '<div><b>'+esc(K.pick(x.events.name_en,x.events.name_zh))+'</b> · '+K.fmtDate(x.events.event_date)+'<br><span class="muted">'+
           x.tickets+' '+t('tix')+(x.amount?' · RM'+(+x.amount):'')+(x.paid?' · '+t('paid'):'')+(x.booked_by?' · '+t('by')+' '+esc(x.booked_by):'')+' · '+srcLabel(x.source)+(x.notes?' · '+esc(x.notes):'')+'</span></div>';
       }).join('') || '<div class="muted">–</div>';
+    });
+    sheet.querySelector('#phin').addEventListener('change',function(){
+      var f=this.files&&this.files[0]; if(!f) return;
+      shrink(f,function(img){
+        if(!img){ K.toast(t('err')); return; }
+        sb.from('contact_photos').upsert({contact_id:c.id,img:img,updated_at:new Date().toISOString()}).then(function(r){
+          if(r.error){ K.toast(t('err')); return; }
+          PHOTOS[c.id]=img; K.toast(t('photoSaved')); render(); openPerson(c.id);
+        });
+      });
+    });
+    var rm=sheet.querySelector('#rmph'); if(rm) rm.addEventListener('click',function(){
+      sb.from('contact_photos').delete().eq('contact_id',c.id).then(function(r){
+        if(r.error){ K.toast(t('err')); return; }
+        delete PHOTOS[c.id]; K.toast(t('photoGone')); render(); openPerson(c.id);
+      });
     });
     sheet.querySelectorAll('[data-merge]').forEach(function(b){ b.addEventListener('click',function(){
       var o=ALL.find(function(x){return x.id===+b.dataset.merge;});
