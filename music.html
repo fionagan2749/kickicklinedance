@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Songs & videos · KickickLineDance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kld-admin.css">
+<!-- Layout: team-only class library. Search → tabs (Songs / Training videos) → sort / group chips → rows.
+     Songs: play button streams the private file in the player bar at the bottom (repeat + slower speed for teaching).
+     Videos: YouTube (unlisted) link or a small uploaded file, grouped by song or by teacher. -->
+<style>
+.tabs{display:flex;gap:6px;margin:10px 0 8px}
+.tabs button{flex:1;border:1.3px solid rgba(30,27,75,.1);background:rgba(255,255,255,.7);border-radius:16px;padding:11px 8px;font-weight:800;font-size:14.5px;color:var(--ink)}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.list{gap:6px}
+.row{padding:9px 12px;gap:12px}
+.rowmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:transparent;text-align:left;padding:0;cursor:pointer}
+.play{width:44px;height:44px;border-radius:14px;border:0;flex-shrink:0;display:grid;place-items:center;color:#fff;background:var(--cta)}
+.play svg{width:20px;height:20px}
+.play.on{background:var(--ink)}
+.thumb{width:76px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;background:rgba(30,27,75,.08);display:grid;place-items:center;color:var(--muted)}
+.thumb svg{width:20px;height:20px}
+.grp{display:flex;justify-content:space-between;align-items:baseline;margin:14px 4px 2px;font-weight:800;font-size:14px}
+.grp span{font-size:12.5px;color:var(--muted);font-weight:700}
+.player{position:fixed;left:0;right:0;bottom:0;z-index:70;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0}
+.player .top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.player .top b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14.5px}
+.player audio{width:100%;height:40px}
+.player .chip{padding:5px 10px;font-size:12.5px}
+@media (min-width:1024px){.player{left:256px}}
+body.playing .app{padding-bottom:130px}
+.vid{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;margin-bottom:12px}
+.vid iframe,.vid video{position:absolute;inset:0;width:100%;height:100%;border:0}
+.hint{font-size:12.5px;color:var(--muted);font-weight:600;margin:0}
+.or{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12.5px;font-weight:800}
+.or:before,.or:after{content:"";flex:1;height:1px;background:rgba(30,27,75,.12)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="who"><small data-t="kicker"></small><b data-t="title"></b></div>
+    <div class="lang glass-pill" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </header>
+  <div id="me"></div>
+
+  <section style="margin-top:8px">
+    <label class="search glass-pill"><span id="sic"></span><input id="q" type="search" data-ph="ph" autocomplete="off" aria-label="Search"></label>
+  </section>
+
+  <div class="tabs" role="group" aria-label="Library">
+    <button type="button" data-tab="songs" aria-pressed="true"></button>
+    <button type="button" data-tab="videos" aria-pressed="false"></button>
+  </div>
+
+  <section>
+    <div class="chips" id="chips"></div>
+    <div class="sh" style="margin:6px 0 0">
+      <div class="cnt" id="cnt"></div>
+      <button class="btn cta" id="add" type="button"></button>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<div class="player glass" id="player" hidden>
+  <div class="top"><b id="pt"></b>
+    <button type="button" class="chip" id="rep" aria-pressed="false"></button>
+    <select class="chip" id="spd" aria-label="Speed"><option value="0.75">0.75×</option><option value="0.9">0.9×</option><option value="1" selected>1×</option></select>
+    <button type="button" class="chip" id="pclose" aria-label="Close">✕</button>
+  </div>
+  <audio id="au" controls preload="none"></audio>
+</div>
+
+<div class="sheet-back" id="back" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
+
+<script>if(location.hostname==='localhost'&&/mock/.test(location.search))document.write('<script src="kld-mock.js"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="kld-db.js"></script>
+<script>
+(function(){
+  var K=KLD, sb=K.sb, esc=K.esc, BUCKET='class-media', MAXMB=50;
+  var T={
+    kicker:['Class library','课堂资料库'], title:['Songs & training videos','歌曲与教学视频'],
+    ph:['Search song, singer or teacher','搜歌名、歌手或老师'],
+    songs:['Songs','歌曲'], videos:['Training videos','教学视频'],
+    s_title:['Sort: A–Z','排序：A–Z'], s_new:['Sort: newest','排序：最新'],
+    g_song:['Group: by song','分组：按歌曲'], g_teacher:['Group: by teacher','分组：按老师'],
+    allLv:['All levels','全部程度'], lv1:['Beginner','初级'], lv2:['Intermediate','中级'], lv3:['Advanced','高级'],
+    addSong:['Add song','加歌曲'], addVid:['Add video','加视频'],
+    nSongs:['%n songs','%n 首歌'], nVids:['%n videos','%n 个视频'], nSong1:['1 song','1 首歌'], nVid1:['1 video','1 个视频'],
+    noSongs:['No songs yet. Tap “Add song” to upload the first one.','还没有歌曲。点「加歌曲」上传第一首。'],
+    noVids:['No training videos yet. Tap “Add video”.','还没有教学视频。点「加视频」。'],
+    none:['Nothing matches. Try a shorter word.','找不到，试短一点的字。'],
+    title2:['Song name','歌名'], artist:['Singer','歌手'], level:['Level','程度'], notes:['Notes (steps, counts…)','备注（舞步、拍子…）'],
+    file:['Music file (MP3, up to 50 MB)','音乐档（MP3，最多 50 MB）'], keepFile:['Leave empty to keep the current file.','不换档案就留空。'],
+    vtitle:['Video name','视频名称'], teacher:['Teacher','老师'], song:['Song','歌曲'], noSong:['— no song —','— 不指定 —'],
+    yt:['YouTube link (upload as “Unlisted”)','YouTube 链接（上传时选「不公开」）'], or:['or','或'],
+    vfile:['Small video file (up to 50 MB)','小视频档（最多 50 MB）'],
+    save:['Save','保存'], saved:['Saved','已保存'], del:['Delete','删除'], delQ:['Delete “%a”?','删除「%a」？'],
+    uploading:['Uploading… please keep this page open','上传中…请不要关掉这页'],
+    tooBig:['File is bigger than 50 MB. For long videos use a YouTube link.','档案超过 50 MB。长视频请用 YouTube 链接。'],
+    needTitle:['Please type a name','请输入名称'], needSrc:['Add a YouTube link or a video file','请加 YouTube 链接或视频档'], needFile:['Please choose the music file','请选择音乐档'],
+    badLink:['That does not look like a YouTube link','这不像 YouTube 链接'],
+    repeat:['Repeat','重复'], noTeacher:['No teacher','未填老师'], noSongG:['Not linked to a song','没指定歌曲'],
+    vidsFor:['Training videos','教学视频'], edit:['Edit','修改'], err:['Something went wrong. Try again.','出错了，请再试。'],
+    open:['Open in YouTube','在 YouTube 打开']
+  };
+  function t(k){ return T[k][K.lang()==='zh'?1:0]; }
+  function cnt(k,n){ return n===1?t(k==='nSongs'?'nSong1':'nVid1'):t(k).replace('%n',n); }
+  var SONGS=[], VIDS=[], TEACHERS=[], view={tab:'songs',q:'',sort:'title',group:'song',lv:''}, playing=null;
+  var BASE_TEACHERS=['Wendy Loh','Melvin','Ann Soh','Adelyn Pong','Jane Tang','Wiwien Loh','Rowena Hu'];
+  var IC={
+    play:'<path d="M8 5v14l11-7z" fill="currentColor"/>', pause:'<path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/>',
+    film:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z" fill="currentColor"/>', edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>'
+  };
+  function ic(n){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[n]+'</svg>'; }
+
+  document.getElementById('sic').innerHTML=K.icon('search');
+  K.gate(load);
+  K.onLang(function(){ render(); });
+
+  function load(){
+    Promise.all([
+      sb.from('songs').select('*').order('title'),
+      sb.from('training_videos').select('*').order('created_at',{ascending:false}),
+      sb.from('contacts').select('teacher').not('teacher','is',null)
+    ]).then(function(r){
+      if(r[0].error||r[1].error){ K.toast(t('err')); return; }
+      SONGS=r[0].data; VIDS=r[1].data;
+      var tset={}; BASE_TEACHERS.concat((r[2].data||[]).map(function(x){ return x.teacher; })).concat(VIDS.map(function(v){ return v.teacher; }))
+        .forEach(function(n){ if(n) tset[n]=1; });
+      TEACHERS=Object.keys(tset).sort();
+      render();
+    });
+  }
+  function songById(id){ return SONGS.find(function(s){ return s.id===id; }); }
+  function lvLabel(l){ return l?t(l):''; }
+  function ytId(u){ var m=String(u||'').match(/(?:youtu\.be\/|[?&]v=|shorts\/|embed\/|live\/)([\w-]{11})/); return m?m[1]:null; }
+  function has(s,q){ return String(s||'').toLowerCase().indexOf(q)>=0; }
+
+  function render(){
+    K.apply(T);
+    document.querySelectorAll('[data-tab]').forEach(function(b){ b.textContent=t(b.dataset.tab)+' ('+(b.dataset.tab==='songs'?SONGS.length:VIDS.length)+')'; b.setAttribute('aria-pressed',b.dataset.tab===view.tab); });
+    document.getElementById('add').innerHTML=K.icon('plus')+t(view.tab==='songs'?'addSong':'addVid');
+    document.getElementById('rep').textContent='🔁 '+t('repeat');
+    var q=view.q.toLowerCase(), ch='', html='', n=0, L=document.getElementById('list');
+    if(view.tab==='songs'){
+      ch+='<select class="chip" id="sort">'+['title','new'].map(function(s){ return '<option value="'+s+'"'+(view.sort===s?' selected':'')+'>'+t('s_'+s)+'</option>'; }).join('')+'</select>';
+      ch+='<select class="chip'+(view.lv?' on':'')+'" id="lv"><option value="">'+t('allLv')+'</option>'+['lv1','lv2','lv3'].map(function(l){ return '<option value="'+l+'"'+(view.lv===l?' selected':'')+'>'+t(l)+'</option>'; }).join('')+'</select>';
+      var list=SONGS.filter(function(s){ return (!q||has(s.title,q)||has(s.artist,q)||has(s.notes,q)) && (!view.lv||s.level===view.lv); });
+      list.sort(view.sort==='new'?function(a,b){ return String(b.created_at).localeCompare(String(a.created_at)); }:function(a,b){ return a.title.localeCompare(b.title); });
+      n=list.length;
+      html=list.map(songRow).join('') || '<div class="empty glass">'+t(SONGS.length?'none':'noSongs')+'</div>';
+      document.getElementById('cnt').textContent=cnt('nSongs',n);
+    } else {
+      ch+='<select class="chip" id="group">'+['song','teacher'].map(function(g){ return '<option value="'+g+'"'+(view.group===g?' selected':'')+'>'+t('g_'+g)+'</option>'; }).join('')+'</select>';
+      var vl=VIDS.filter(function(v){ var s=songById(v.song_id); return !q||has(v.title,q)||has(v.teacher,q)||has(v.notes,q)||(s&&has(s.title,q)); });
+      n=vl.length;
+      var groups={};
+      vl.forEach(function(v){
+        var key, label;
+        if(view.group==='song'){ var s=songById(v.song_id); key=s?'0'+s.title:'1'; label=s?s.title:t('noSongG'); }
+        else { key=v.teacher?'0'+v.teacher:'1'; label=v.teacher||t('noTeacher'); }
+        (groups[key]=groups[key]||{label:label,items:[]}).items.push(v);
+      });
+      html=Object.keys(groups).sort().map(function(k){ var g=groups[k];
+        return '<div class="grp">'+esc(g.label)+'<span>'+cnt('nVids',g.items.length)+'</span></div>'+g.items.map(vidRow).join('');
+      }).join('') || '<div class="empty glass">'+t(VIDS.length?'none':'noVids')+'</div>';
+      document.getElementById('cnt').textContent=cnt('nVids',n);
+    }
+    var C=document.getElementById('chips'); C.innerHTML=ch;
+    C.querySelectorAll('select').forEach(function(sel){ sel.addEventListener('change',function(){ view[sel.id]=sel.value; render(); }); });
+    L.innerHTML=html;
+    L.querySelectorAll('[data-play]').forEach(function(b){ b.addEventListener('click',function(){ play(+b.dataset.play); }); });
+    L.querySelectorAll('[data-song]').forEach(function(b){ b.addEventListener('click',function(){ songSheet(songById(+b.dataset.song)); }); });
+    L.querySelectorAll('[data-vid]').forEach(function(b){ b.addEventListener('click',function(){ vidSheet(VIDS.find(function(v){ return v.id===+b.dataset.vid; })); }); });
+  }
+  function songRow(s){
+    var nv=VIDS.filter(function(v){ return v.song_id===s.id; }).length, on=playing===s.id;
+    return '<div class="row glass">'+(s.file_path?'<button type="button" class="play'+(on?' on':'')+'" data-play="'+s.id+'" aria-label="Play '+esc(s.title)+'">'+ic(on?'pause':'play')+'</button>':'')+
+      '<button type="button" class="rowmain" data-song="'+s.id+'"><span class="main"><span class="nm">'+esc(s.title)+'</span><span class="sub">'+
+      [s.artist?esc(s.artist):'',s.level?'<span class="tag plain">'+lvLabel(s.level)+'</span>':'',nv?'<span class="tag ev">🎬 '+nv+'</span>':''].filter(Boolean).join(' · ')+'</span></span></button></div>';
+  }
+  function vidRow(v){
+    var id=ytId(v.url), s=songById(v.song_id);
+    var th=id?'<img class="thumb" src="https://i.ytimg.com/vi/'+id+'/mqdefault.jpg" alt="" loading="lazy">':'<span class="thumb">'+ic('film')+'</span>';
+    var sub=view.group==='song'?(v.teacher||''):(s?s.title:'');
+    return '<div class="row glass"><button type="button" class="rowmain" data-vid="'+v.id+'">'+th+'<span class="main"><span class="nm">'+esc(v.title)+'</span><span class="sub">'+esc(sub)+'</span></span></button></div>';
+  }
+
+  /* ---- player ---- */
+  var au=document.getElementById('au'), P=document.getElementById('player');
+  function play(id){
+    var s=songById(id); if(!s) return;
+    if(playing===id){ if(au.paused) au.play(); else au.pause(); return; }
+    sb.storage.from(BUCKET).createSignedUrl(s.file_path,3600*4).then(function(r){
+      if(r.error){ K.toast(t('err')); return; }
+      playing=id; au.src=r.data.signedUrl; au.playbackRate=+document.getElementById('spd').value; au.play();
+      document.getElementById('pt').textContent=s.title+(s.artist?' · '+s.artist:'');
+      P.hidden=false; document.body.classList.add('playing'); render();
+    });
+  }
+  au.addEventListener('play',function(){ au.playbackRate=+document.getElementById('spd').value; });
+  document.getElementById('spd').addEventListener('change',function(){ au.playbackRate=+this.value; });
+  document.getElementById('rep').addEventListener('click',function(){ au.loop=!au.loop; this.setAttribute('aria-pressed',au.loop); });
+  document.getElementById('pclose').addEventListener('click',function(){ au.pause(); au.removeAttribute('src'); au.load(); playing=null; P.hidden=true; document.body.classList.remove('playing'); render(); });
+
+  /* ---- sheets ---- */
+  var sheet=document.getElementById('sheet'), back=document.getElementById('back');
+  function closeSheet(){ var v=sheet.querySelector('video'); if(v) v.pause(); sheet.innerHTML=''; sheet.hidden=true; back.hidden=true; }
+  back.addEventListener('click',closeSheet);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeSheet(); });
+  function openSheet(title,body){
+    sheet.innerHTML='<div class="hd"><div style="flex:1;min-width:0"><h3>'+esc(title)+'</h3></div><button class="x" type="button" aria-label="Close">'+K.icon('x')+'</button></div>'+body;
+    sheet.hidden=false; back.hidden=false; sheet.querySelector('.x').addEventListener('click',closeSheet);
+  }
+  function safeName(n){ return String(n).toLowerCase().replace(/[^a-z0-9.]+/g,'-').replace(/^-+|-+$/g,'').slice(-60)||'file'; }
+  function upload(folder,file){
+    var path=folder+'/'+Date.now()+'-'+safeName(file.name);
+    return sb.storage.from(BUCKET).upload(path,file,{contentType:file.type||undefined}).then(function(r){ if(r.error) throw r.error; return path; });
+  }
+  function removeFile(path){ if(path) sb.storage.from(BUCKET).remove([path]); }
+
+  function songSheet(s){
+    var isNew=!s; s=s||{};
+    var vids=isNew?[]:VIDS.filter(function(v){ return v.song_id===s.id; });
+    openSheet(isNew?t('addSong'):s.title,
+      (vids.length?'<h4 style="margin:0 0 6px">'+t('vidsFor')+'</h4><div class="list" style="margin-bottom:14px">'+vids.map(vidRow).join('')+'</div>':'')+
+      '<form id="sf" style="display:flex;flex-direction:column;gap:10px">'+
+      '<label class="field"><span>'+t('title2')+'</span><input class="inp" name="title" required value="'+esc(s.title||'')+'"></label>'+
+      '<div class="grid2"><label class="field"><span>'+t('artist')+'</span><input class="inp" name="artist" value="'+esc(s.artist||'')+'"></label>'+
+      '<label class="field"><span>'+t('level')+'</span><select class="inp" name="level"><option value="">–</option>'+['lv1','lv2','lv3'].map(function(l){ return '<option value="'+l+'"'+(s.level===l?' selected':'')+'>'+t(l)+'</option>'; }).join('')+'</select></label></div>'+
+      '<label class="field"><span>'+t('file')+'</span><input class="inp" type="file" name="file" accept="audio/*"></label>'+
+      (s.file_name?'<p class="hint">🎵 '+esc(s.file_name)+' · '+t('keepFile')+'</p>':'')+
+      '<label class="field"><span>'+t('notes')+'</span><textarea class="inp" name="notes">'+esc(s.notes||'')+'</textarea></label>'+
+      '<div style="display:flex;gap:8px;justify-content:space-between">'+(isNew?'<span></span>':'<button class="btn danger" type="button" id="del">'+K.icon('trash')+t('del')+'</button>')+'<button class="btn cta" id="sv">'+t('save')+'</button></div></form>');
+    sheet.querySelectorAll('[data-vid]').forEach(function(b){ b.addEventListener('click',function(){ vidSheet(VIDS.find(function(v){ return v.id===+b.dataset.vid; })); }); });
+    var f=sheet.querySelector('#sf');
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      var file=f.file.files[0], row={title:f.title.value.trim(),artist:f.artist.value.trim()||null,level:f.level.value||null,notes:f.notes.value.trim()||null};
+      if(!row.title){ K.toast(t('needTitle')); return; }
+      if(isNew&&!file){ K.toast(t('needFile')); return; }
+      if(file&&file.size>MAXMB*1048576){ K.toast(t('tooBig')); return; }
+      var b=f.querySelector('#sv'); b.disabled=true; b.textContent=t('uploading');
+      (file?upload('songs',file):Promise.resolve(null)).then(function(path){
+        if(path){ row.file_path=path; row.file_name=file.name; }
+        return isNew?sb.from('songs').insert(row):sb.from('songs').update(row).eq('id',s.id);
+      }).then(function(r){
+        if(r.error) throw r.error;
+        if(file&&!isNew) removeFile(s.file_path);
+        K.toast(t('saved')); closeSheet(); load();
+      }).catch(function(){ b.disabled=false; b.textContent=t('save'); K.toast(t('err')); });
+    });
+    var d=sheet.querySelector('#del'); if(d) d.addEventListener('click',function(){
+      if(!confirm(t('delQ').replace('%a',s.title))) return;
+      sb.from('songs').delete().eq('id',s.id).then(function(r){ if(r.error){ K.toast(t('err')); return; } removeFile(s.file_path); closeSheet(); load(); });
+    });
+  }
+
+  function vidSheet(v){
+    var isNew=!v; v=v||{};
+    var id=ytId(v.url), top='';
+    if(id) top='<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="'+esc(v.title)+'"></iframe></div>'+
+      '<p class="hint" style="margin:-4px 0 12px"><a href="https://youtu.be/'+id+'" target="_blank" rel="noopener">'+t('open')+' ↗</a></p>';
+    else if(v.file_path) top='<div class="vid" id="vbox"></div>';
+    openSheet(isNew?t('addVid'):v.title, top+
+      (isNew?'':'<h4 style="margin:4px 0 8px">'+t('edit')+'</h4>')+
+      '<form id="vf" style="display:flex;flex-direction:column;gap:10px">'+
+      '<label class="field"><span>'+t('vtitle')+'</span><input class="inp" name="title" required value="'+esc(v.title||'')+'"></label>'+
+      '<div class="grid2"><label class="field"><span>'+t('teacher')+'</span><input class="inp" name="teacher" list="tl" value="'+esc(v.teacher||'')+'"></label>'+
+      '<label class="field"><span>'+t('song')+'</span><select class="inp" name="song"><option value="">'+t('noSong')+'</option>'+SONGS.map(function(s){ return '<option value="'+s.id+'"'+(v.song_id===s.id?' selected':'')+'>'+esc(s.title)+'</option>'; }).join('')+'</select></label></div>'+
+      '<datalist id="tl">'+TEACHERS.map(function(n){ return '<option>'+esc(n)+'</option>'; }).join('')+'</datalist>'+
+      '<label class="field"><span>'+t('yt')+'</span><input class="inp" name="url" inputmode="url" placeholder="https://youtu.be/…" value="'+esc(v.url||'')+'"></label>'+
+      '<div class="or">'+t('or')+'</div>'+
+      '<label class="field"><span>'+t('vfile')+'</span><input class="inp" type="file" name="file" accept="video/*"></label>'+
+      '<label class="field"><span>'+t('notes')+'</span><textarea class="inp" name="notes">'+esc(v.notes||'')+'</textarea></label>'+
+      '<div style="display:flex;gap:8px;justify-content:space-between">'+(isNew?'<span></span>':'<button class="btn danger" type="button" id="del">'+K.icon('trash')+t('del')+'</button>')+'<button class="btn cta" id="sv">'+t('save')+'</button></div></form>');
+    if(!id&&v.file_path) sb.storage.from(BUCKET).createSignedUrl(v.file_path,3600*4).then(function(r){
+      var box=document.getElementById('vbox'); if(box&&!r.error) box.innerHTML='<video controls playsinline preload="metadata" src="'+esc(r.data.signedUrl)+'"></video>';
+    });
+    var f=sheet.querySelector('#vf');
+    f.addEventListener('submit',function(e){
+      e.preventDefault();
+      var file=f.file.files[0], url=f.url.value.trim();
+      var row={title:f.title.value.trim(),teacher:f.teacher.value.trim()||null,song_id:f.song.value?+f.song.value:null,url:url||null,notes:f.notes.value.trim()||null};
+      if(!row.title){ K.toast(t('needTitle')); return; }
+      if(url&&!ytId(url)){ K.toast(t('badLink')); return; }
+      if(!url&&!file&&!v.file_path){ K.toast(t('needSrc')); return; }
+      if(file&&file.size>MAXMB*1048576){ K.toast(t('tooBig')); return; }
+      var b=f.querySelector('#sv'); b.disabled=true; b.textContent=file?t('uploading'):t('save');
+      (file?upload('videos',file):Promise.resolve(null)).then(function(path){
+        if(path) row.file_path=path;
+        return isNew?sb.from('training_videos').insert(row):sb.from('training_videos').update(row).eq('id',v.id);
+      }).then(function(r){
+        if(r.error) throw r.error;
+        if(file&&!isNew) removeFile(v.file_path);
+        K.toast(t('saved')); closeSheet(); load();
+      }).catch(function(){ b.disabled=false; b.textContent=t('save'); K.toast(t('err')); });
+    });
+    var d=sheet.querySelector('#del'); if(d) d.addEventListener('click',function(){
+      if(!confirm(t('delQ').replace('%a',v.title))) return;
+      sb.from('training_videos').delete().eq('id',v.id).then(function(r){ if(r.error){ K.toast(t('err')); return; } removeFile(v.file_path); closeSheet(); load(); });
+    });
+  }
+
+  document.querySelectorAll('[data-tab]').forEach(function(b){ b.addEventListener('click',function(){ view.tab=b.dataset.tab; render(); }); });
+  document.getElementById('q').addEventListener('input',function(){ view.q=this.value.trim(); render(); });
+  document.getElementById('add').addEventListener('click',function(){ if(view.tab==='songs') songSheet(null); else vidSheet(null); });
+})();
+</script>
+<script src="admin-nav.js" data-active="music"></script>
+</body>
+</html>
