@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teachers · KickickLineDance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: phone-width column; area chips + two-column teacher cards (same glass system as the home page). */
+:root{
+  --ink:#1E1B4B; --muted:#6B6688; --bg:#FCF3EE;
+  --rim:linear-gradient(135deg,#FFB3D6 0%,#fff 20%,#9FE6FF 40%,#fff 58%,#C9B2FF 76%,#FFC9A3 92%);
+  --cta:linear-gradient(90deg,#FF8A3D 0%,#FF4F8B 50%,#A63CF0 100%);
+  --hot:#E8475B;
+  --font:"Plus Jakarta Sans","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;
+  background:
+    radial-gradient(360px 360px at 0% 0%,rgba(255,205,215,.55),transparent 70%),
+    radial-gradient(360px 360px at 100% 30%,rgba(201,178,255,.45),transparent 70%),
+    radial-gradient(360px 360px at 0% 75%,rgba(255,201,163,.45),transparent 70%),
+    linear-gradient(#FCF3EE,#F6EEF8);
+  background-attachment:fixed;min-height:100vh}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(110px + env(safe-area-inset-bottom,0px))}
+.glass,.glass-pill{border:1.3px solid transparent;
+  background:linear-gradient(165deg,rgba(255,255,255,.82),rgba(255,255,255,.5)) padding-box, var(--rim) border-box;
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);
+  box-shadow:inset 0 1.5px 0 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 -10px 18px -14px rgba(139,92,246,.25), 0 8px 24px 0 rgba(139,92,246,.13), -8px 12px 24px -18px rgba(236,72,153,.35), 10px -4px 22px -18px rgba(6,182,212,.35)}
+.glass{border-radius:22px}
+.glass-pill{border-radius:999px}
+.cta{border:0;background:var(--cta);color:#fff;font-weight:700;border-radius:999px;padding:10px 18px;box-shadow:0 8px 18px -8px rgba(255,79,139,.6);text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+
+header{position:sticky;top:0;z-index:20;padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;display:flex;align-items:center;gap:10px}
+header::before{content:"";position:absolute;inset:0 -16px;z-index:-1;background:linear-gradient(rgba(252,243,238,.88),rgba(252,243,238,.6));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.back{width:44px;height:44px;display:grid;place-items:center;text-decoration:none;flex-shrink:0}
+.brand{font-weight:800;font-size:clamp(14px,4.1vw,18px);letter-spacing:-.4px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lang{display:flex;padding:3px;gap:2px}
+.lang button{border:0;background:transparent;font-weight:700;font-size:13px;padding:7px 9px;border-radius:999px}
+.lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+.title{font-size:24px;font-weight:800;margin:4px 0 12px}
+.chips button{border:1.3px solid transparent;font-weight:700;font-size:14px;padding:8px 13px}
+.chips button[aria-pressed="true"]{background:var(--cta) padding-box,var(--cta) border-box;color:#fff;box-shadow:0 6px 14px -8px rgba(255,79,139,.7)}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0;text-align:center}
+nav.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(448px,calc(100% - 24px));display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:6px 6px 8px;z-index:30}
+nav.tabbar a,nav.tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 0;border-radius:18px}
+nav.tabbar .on{color:#2563EB;background:linear-gradient(180deg,rgba(191,219,254,.7),rgba(255,255,255,.4))}
+nav.tabbar svg{width:24px;height:24px}
+nav.tabbar .qr{margin-top:-30px}
+nav.tabbar .qr .orb{width:62px;height:62px;border-radius:50%;background:var(--cta);display:grid;place-items:center;color:#fff;box-shadow:0 10px 24px -8px rgba(255,79,139,.7), inset 0 2px 0 rgba(255,255,255,.5);border:3px solid rgba(255,255,255,.8)}
+nav.tabbar .qr span{color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:40}
+
+.chips{display:flex;gap:7px;flex-wrap:wrap;padding:0 0 12px}
+.lead{margin:-6px 0 12px;color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tc{overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit}
+.tc .ph{display:block;position:relative}
+.tc .ph img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top}
+.tc .ph img.card{object-position:50% 58%}
+.tc .since{position:absolute;left:8px;bottom:8px;font-size:11.5px;font-weight:800;color:#fff;background:rgba(30,27,75,.72);border-radius:999px;padding:3px 9px}
+.tc .founder{background:var(--cta)}
+.tc .body{padding:9px 11px 12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tc .nm{font-weight:800;font-size:15.5px;line-height:1.2}
+.tc .ar{font-size:12.5px;color:var(--muted);line-height:1.35}
+.tc .sk{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.tc .sk span{font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;background:rgba(166,60,240,.1);color:#7A2DB8}
+.empty{padding:24px;text-align:center;color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a class="back glass-pill" href="./" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></a>
+    <div class="brand">KickickLineDance</div>
+    <div class="lang glass-pill" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </header>
+  <h1 class="title" data-t="title"></h1>
+  <p class="lead" data-t="lead"></p>
+  <div class="chips" id="areas" role="group" aria-label="Area"></div>
+  <div class="grid" id="grid"></div>
+  <p class="note" data-t="note"></p>
+</div>
+
+<nav class="tabbar glass" aria-label="Main">
+  <a href="./"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span data-t="navHome"></span></a>
+  <a href="classes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-t="navClasses"></span></a>
+  <button type="button" class="qr" data-soon><span class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="13" width="4" height="4"/><path d="M13 7h4v4M7 13v4h4"/></svg></span><span data-t="navQR"></span></button>
+  <a href="products.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6"/></svg><span data-t="navCart"></span></a>
+  <button type="button" data-soon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-t="navMe"></span></button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+  var T={
+    en:{title:'Our Teachers',lead:'Kickick Line Dance since 2004. Find a teacher near you.',all:'All',since:'Since',founder:'Founder',
+      note:'Tap a teacher to see the full profile card.',navHome:'Home',navClasses:'Classes',navQR:'My QR',navCart:'Cart',navMe:'Me',soon:'Coming soon',none:'No teacher in this area yet.',
+      ld:'Line dance',sd:'Square dance',fd:'Folk dance',kp:'KPOP fitness',cd:'Modern China dance'},
+    zh:{title:'我们的老师',lead:'Kickick Line Dance 自 2004 年起。找离你最近的老师。',all:'全部',since:'执教自',founder:'创办人',
+      note:'点老师可看完整介绍卡。',navHome:'首页',navClasses:'课程',navQR:'我的 QR',navCart:'购物车',navMe:'我的',soon:'即将推出',none:'这个地区暂时没有老师。',
+      ld:'排舞',sd:'广场舞',fd:'土风舞',kp:'KPOP 健身舞',cd:'中国现代舞'}
+  };
+  var AREAS=[['all'],['cheras','Cheras','蕉赖'],['kl','KL · OUG · Ampang','吉隆坡 · OUG · 安邦'],['puchong','Puchong','蒲种'],['serdang','Serdang · Seri Kembangan','沙登 · Seri Kembangan'],['balakong','Balakong · Sg Long','万宜 · Sg Long'],['kajang','Kajang · Semenyih','加影 · 士毛月']];
+  /* img: website photo (t-*) or the instructor profile card from the Kickick Facebook album (tc-*). */
+  var P=[
+    {img:'t-wendy.jpg',y:2004,f:1,a:['cheras','kl','puchong','serdang'],sk:['ld','sd'],en:['Wendy Loh','Cheras · OUG · Puchong · Seri Kembangan'],zh:['猫姐 Wendy Loh','蕉赖 · OUG · 蒲种 · Seri Kembangan']},
+    {img:'t-melvin.jpg',a:['serdang'],sk:['sd'],en:['Melvin Tan','Seri Kembangan'],zh:['猫哥 Melvin Tan','Seri Kembangan']},
+    {img:'t-ann.jpg',a:['puchong'],sk:['sd'],en:['Ann Soh','Puchong · Bandar Puteri · Putra Prima'],zh:['猫妹 Ann Soh','蒲种 · Bandar Puteri · Putra Prima']},
+    {img:'tc-wiwien-loh.jpg',y:2004,a:['puchong'],sk:['ld','sd'],en:['Wiwien Loh','Puchong · X2 Residensi, Taman Prima Utama'],zh:['Wiwien Loh','蒲种 · X2 Residensi, Taman Prima Utama']},
+    {img:'t-adelyn.jpg',a:['cheras'],sk:['sd'],en:['Adelyn Pong','Cheras · Tasik Permaisuri'],zh:['Adelyn Pong','蕉赖 · Tasik Permaisuri']},
+    {img:'t-jane.jpg',a:['kajang'],sk:['sd'],en:['Jane Tang','Kajang'],zh:['Jane Tang','加影']},
+    {img:'t-rowena.jpg',a:['kl'],sk:['sd'],en:['Rowena Hu','OUG'],zh:['Rowena Hu','OUG']},
+    {img:'tc-blue-angel.jpg',y:2004,a:['cheras'],sk:['ld','sd'],en:['Blue Angel · May Ong & Andeline','Cheras · Sri Permaisuri'],zh:['Blue Angel · May Ong & Andeline','蕉赖 · Sri Permaisuri']},
+    {img:'tc-angie-may.jpg',y:2006,a:['cheras'],sk:['ld','sd'],en:['Angie Chong & May Khoh','Cheras · Taman Segar · Taman Murni'],zh:['Angie Chong & May Khoh','蕉赖 · Taman Segar · Taman Murni']},
+    {img:'tc-janice-chin.jpg',y:2006,a:['serdang','puchong'],sk:['ld','sd'],en:['Janice Chin','Serdang · Puchong'],zh:['Janice Chin','沙登 · 蒲种']},
+    {img:'tc-jenny-leong.jpg',y:2006,a:['cheras','kajang'],sk:['ld','sd'],en:['Jenny Leong','Taman Murni · Semenyih'],zh:['Jenny Leong','Taman Murni · 士毛月']},
+    {img:'tc-sally-tan.jpg',y:2006,a:['kl'],sk:['ld','sd','fd'],en:['Sally Tan','Ampang · Taman Putra · Paragon Point'],zh:['Sally Tan','安邦 · Taman Putra · Paragon Point']},
+    {img:'tc-annie-yap.jpg',y:2008,a:['balakong','cheras'],sk:['ld','sd'],en:['Annie Yap','Sg Besi Indah · Balakong · Cheras Batu 11 · Bandar Sg Long'],zh:['Annie Yap','Sg Besi Indah · 万宜 · 蕉赖十一哩 · Bandar Sg Long']},
+    {img:'tc-stephanie-lim.jpg',y:2008,a:['cheras'],sk:['ld','sd'],en:['Stephanie Lim','Landmark Residence 2 · Taman Tasik Permaisuri'],zh:['Stephanie Lim','Landmark Residence 2 · Taman Tasik Permaisuri']},
+    {img:'tc-pooi-kuan.jpg',y:2009,a:['cheras'],sk:['ld','sd','kp'],en:['Pooi Kuan','Cheras · Taman Segar'],zh:['Pooi Kuan','蕉赖 · Taman Segar']},
+    {img:'tc-irene-yeo.jpg',y:2011,a:['cheras'],sk:['ld','sd'],en:['Irene Yeo','Cheras · Taman Putra'],zh:['Irene Yeo','蕉赖 · Taman Putra']},
+    {img:'tc-evon-mau.jpg',y:2012,a:['balakong','cheras'],sk:['ld','sd'],en:['Evon Mau','Balakong · Cheras Batu 11 · Bandar Sg Long'],zh:['Evon Mau','万宜 · 蕉赖十一哩 · Bandar Sg Long']},
+    {img:'tc-mei-yan.jpg',y:2013,a:['serdang','kl'],sk:['ld','sd','cd'],en:['Mei Yan','Serdang · Taman University Indah · OUG'],zh:['美燕','沙登 · Taman University Indah · OUG']},
+    {img:'tc-teresa-lim.jpg',y:2024,a:['cheras'],sk:['ld'],en:['Teresa Lim','Cheras'],zh:['Teresa Lim','蕉赖']}
+  ];
+  var st={lang:'en',area:'all'};
+  try{ if(localStorage.getItem('kld_lang')==='zh') st.lang='zh'; }catch(e){}
+  function el(tag,cls,txt){ var e=document.createElement(tag); if(cls) e.className=cls; if(txt!=null) e.textContent=txt; return e; }
+  function render(){
+    var t=T[st.lang]; document.documentElement.lang=st.lang==='zh'?'zh':'en';
+    document.querySelectorAll('[data-t]').forEach(function(e){ e.textContent=t[e.getAttribute('data-t')]; });
+    document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
+    var box=document.getElementById('areas'); box.innerHTML='';
+    AREAS.forEach(function(x){
+      var n=x[0]==='all'?P.length:P.filter(function(p){return p.a.indexOf(x[0])>=0;}).length;
+      var b=el('button','glass-pill',(x[0]==='all'?t.all:(st.lang==='zh'?x[2]:x[1]))+' ('+n+')'); b.type='button';
+      b.setAttribute('aria-pressed',st.area===x[0]); b.onclick=function(){ st.area=x[0]; render(); }; box.appendChild(b);
+    });
+    var g=document.getElementById('grid'); g.innerHTML='';
+    var list=P.filter(function(p){ return st.area==='all'||p.a.indexOf(st.area)>=0; });
+    if(!list.length){ g.appendChild(el('div','empty',t.none)); }
+    list.forEach(function(p){
+      var d=p[st.lang], c=el('a','tc glass'); c.href=p.img; c.target='_blank'; c.rel='noopener';
+      var ph=el('span','ph'), im=el('img'); im.src=p.img; im.alt=d[0]; im.loading='lazy'; if(/^tc-/.test(p.img)) im.className='card'; ph.appendChild(im);
+      if(p.f) ph.appendChild(el('span','since founder',t.founder+' · '+p.y));
+      else if(p.y) ph.appendChild(el('span','since',t.since+' '+p.y));
+      var b=el('span','body'); b.appendChild(el('span','nm',d[0])); b.appendChild(el('span','ar',d[1]));
+      var sk=el('span','sk'); p.sk.forEach(function(k){ sk.appendChild(el('span',null,t[k])); }); b.appendChild(sk);
+      c.appendChild(ph); c.appendChild(b); g.appendChild(c);
+    });
+    try{ localStorage.setItem('kld_lang',st.lang); }catch(e){}
+  }
+  var tt; function soon(e){ if(e) e.preventDefault(); var x=document.getElementById('toast'); x.textContent=T[st.lang].soon; x.hidden=false; clearTimeout(tt); tt=setTimeout(function(){x.hidden=true;},1600); }
+  document.querySelectorAll('[data-soon]').forEach(function(b){ b.addEventListener('click',soon); });
+  document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click',function(){ st.lang=b.dataset.lang; render(); }); });
+  render();
+})();
+</script>
+</body>
+</html>

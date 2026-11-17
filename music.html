@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="kld-admin.css">
 <!-- Layout: team-only class library. Search → tabs (Songs / Training videos) → sort / group chips → rows.
      Songs: play button streams the private file in the player bar at the bottom (repeat + slower speed for teaching).
-     Videos: YouTube (unlisted) link or a small uploaded file, grouped by song or by teacher. -->
+     Videos: YouTube or Facebook link, or a small uploaded file, grouped by song or by teacher. -->
 <style>
 .tabs{display:flex;gap:6px;margin:10px 0 8px}
 .tabs button{flex:1;border:1.3px solid rgba(30,27,75,.1);background:rgba(255,255,255,.7);border-radius:16px;padding:11px 8px;font-weight:800;font-size:14.5px;color:var(--ink)}
@@ -103,16 +103,16 @@ body.playing .app{padding-bottom:130px}
     title2:['Song name','歌名'], artist:['Singer','歌手'], level:['Level','程度'], notes:['Notes (steps, counts…)','备注（舞步、拍子…）'],
     file:['Music file (MP3, up to 50 MB)','音乐档（MP3，最多 50 MB）'], keepFile:['Leave empty to keep the current file.','不换档案就留空。'],
     vtitle:['Video name','视频名称'], teacher:['Teacher','老师'], song:['Song','歌曲'], noSong:['— no song —','— 不指定 —'],
-    yt:['YouTube link (upload as “Unlisted”)','YouTube 链接（上传时选「不公开」）'], or:['or','或'],
+    yt:['YouTube or Facebook video link','YouTube 或 Facebook 视频链接'], or:['or','或'],
     vfile:['Small video file (up to 50 MB)','小视频档（最多 50 MB）'],
     save:['Save','保存'], saved:['Saved','已保存'], del:['Delete','删除'], delQ:['Delete “%a”?','删除「%a」？'],
     uploading:['Uploading… please keep this page open','上传中…请不要关掉这页'],
-    tooBig:['File is bigger than 50 MB. For long videos use a YouTube link.','档案超过 50 MB。长视频请用 YouTube 链接。'],
-    needTitle:['Please type a name','请输入名称'], needSrc:['Add a YouTube link or a video file','请加 YouTube 链接或视频档'], needFile:['Please choose the music file','请选择音乐档'],
-    badLink:['That does not look like a YouTube link','这不像 YouTube 链接'],
+    tooBig:['File is bigger than 50 MB. For long videos use a video link.','档案超过 50 MB。长视频请用视频链接。'],
+    needTitle:['Please type a name','请输入名称'], needSrc:['Add a video link or a video file','请加视频链接或视频档'], needFile:['Please choose the music file','请选择音乐档'],
+    badLink:['Please paste a YouTube or Facebook video link','请贴 YouTube 或 Facebook 视频链接'],
     repeat:['Repeat','重复'], noTeacher:['No teacher','未填老师'], noSongG:['Not linked to a song','没指定歌曲'],
     vidsFor:['Training videos','教学视频'], edit:['Edit','修改'], err:['Something went wrong. Try again.','出错了，请再试。'],
-    open:['Open in YouTube','在 YouTube 打开']
+    open:['Open in YouTube','在 YouTube 打开'], watchFb:['Watch on Facebook','到 Facebook 观看'], fbFull:['To play it here: open the video on Facebook, copy the address at the top of the browser and paste it below.','要在这里播放：在 Facebook 打开视频，复制浏览器上方的网址，贴在下面。'], noFile:['No music file yet','还没有音乐档']
   };
   function t(k){ return T[k][K.lang()==='zh'?1:0]; }
   function cnt(k,n){ return n===1?t(k==='nSongs'?'nSong1':'nVid1'):t(k).replace('%n',n); }
@@ -145,6 +145,7 @@ body.playing .app{padding-bottom:130px}
   function songById(id){ return SONGS.find(function(s){ return s.id===id; }); }
   function lvLabel(l){ return l?t(l):''; }
   function ytId(u){ var m=String(u||'').match(/(?:youtu\.be\/|[?&]v=|shorts\/|embed\/|live\/)([\w-]{11})/); return m?m[1]:null; }
+  function fbLink(u){ return /^https?:\/\/([\w-]+\.)?(facebook\.com|fb\.watch)\//i.test(String(u||'')); }
   function has(s,q){ return String(s||'').toLowerCase().indexOf(q)>=0; }
 
   function render(){
@@ -188,7 +189,7 @@ body.playing .app{padding-bottom:130px}
     var nv=VIDS.filter(function(v){ return v.song_id===s.id; }).length, on=playing===s.id;
     return '<div class="row glass">'+(s.file_path?'<button type="button" class="play'+(on?' on':'')+'" data-play="'+s.id+'" aria-label="Play '+esc(s.title)+'">'+ic(on?'pause':'play')+'</button>':'')+
       '<button type="button" class="rowmain" data-song="'+s.id+'"><span class="main"><span class="nm">'+esc(s.title)+'</span><span class="sub">'+
-      [s.artist?esc(s.artist):'',s.level?'<span class="tag plain">'+lvLabel(s.level)+'</span>':'',nv?'<span class="tag ev">🎬 '+nv+'</span>':''].filter(Boolean).join(' · ')+'</span></span></button></div>';
+      [s.artist?esc(s.artist):'',s.file_path?'':'<span class="tag warn">'+t('noFile')+'</span>',s.level?'<span class="tag plain">'+lvLabel(s.level)+'</span>':'',nv?'<span class="tag ev">🎬 '+nv+'</span>':''].filter(Boolean).join(' · ')+'</span></span></button></div>';
   }
   function vidRow(v){
     var id=ytId(v.url), s=songById(v.song_id);
@@ -272,6 +273,9 @@ body.playing .app{padding-bottom:130px}
     var id=ytId(v.url), top='';
     if(id) top='<div class="vid"><iframe src="https://www.youtube-nocookie.com/embed/'+id+'?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="'+esc(v.title)+'"></iframe></div>'+
       '<p class="hint" style="margin:-4px 0 12px"><a href="https://youtu.be/'+id+'" target="_blank" rel="noopener">'+t('open')+' ↗</a></p>';
+    else if(fbLink(v.url)&&/\/share\/|fb\.watch/i.test(v.url)) top='<a class="btn cta" style="justify-content:center;margin-bottom:6px" href="'+esc(v.url)+'" target="_blank" rel="noopener">▶ '+t('watchFb')+'</a><p class="hint" style="margin:0 0 12px">'+t('fbFull')+'</p>';
+    else if(fbLink(v.url)) top='<div class="vid"><iframe src="https://www.facebook.com/plugins/video.php?href='+encodeURIComponent(v.url)+'&show_text=false&width=560" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen title="'+esc(v.title)+'"></iframe></div>'+
+      '<a class="btn soft" style="justify-content:center;width:100%;margin:-2px 0 14px" href="'+esc(v.url)+'" target="_blank" rel="noopener">▶ '+t('watchFb')+'</a>';
     else if(v.file_path) top='<div class="vid" id="vbox"></div>';
     openSheet(isNew?t('addVid'):v.title, top+
       (isNew?'':'<h4 style="margin:4px 0 8px">'+t('edit')+'</h4>')+
@@ -280,7 +284,7 @@ body.playing .app{padding-bottom:130px}
       '<div class="grid2"><label class="field"><span>'+t('teacher')+'</span><input class="inp" name="teacher" list="tl" value="'+esc(v.teacher||'')+'"></label>'+
       '<label class="field"><span>'+t('song')+'</span><select class="inp" name="song"><option value="">'+t('noSong')+'</option>'+SONGS.map(function(s){ return '<option value="'+s.id+'"'+(v.song_id===s.id?' selected':'')+'>'+esc(s.title)+'</option>'; }).join('')+'</select></label></div>'+
       '<datalist id="tl">'+TEACHERS.map(function(n){ return '<option>'+esc(n)+'</option>'; }).join('')+'</datalist>'+
-      '<label class="field"><span>'+t('yt')+'</span><input class="inp" name="url" inputmode="url" placeholder="https://youtu.be/…" value="'+esc(v.url||'')+'"></label>'+
+      '<label class="field"><span>'+t('yt')+'</span><input class="inp" name="url" inputmode="url" placeholder="https://…" value="'+esc(v.url||'')+'"></label>'+
       '<div class="or">'+t('or')+'</div>'+
       '<label class="field"><span>'+t('vfile')+'</span><input class="inp" type="file" name="file" accept="video/*"></label>'+
       '<label class="field"><span>'+t('notes')+'</span><textarea class="inp" name="notes">'+esc(v.notes||'')+'</textarea></label>'+
@@ -294,7 +298,7 @@ body.playing .app{padding-bottom:130px}
       var file=f.file.files[0], url=f.url.value.trim();
       var row={title:f.title.value.trim(),teacher:f.teacher.value.trim()||null,song_id:f.song.value?+f.song.value:null,url:url||null,notes:f.notes.value.trim()||null};
       if(!row.title){ K.toast(t('needTitle')); return; }
-      if(url&&!ytId(url)){ K.toast(t('badLink')); return; }
+      if(url&&!ytId(url)&&!fbLink(url)){ K.toast(t('badLink')); return; }
       if(!url&&!file&&!v.file_path){ K.toast(t('needSrc')); return; }
       if(file&&file.size>MAXMB*1048576){ K.toast(t('tooBig')); return; }
       var b=f.querySelector('#sv'); b.disabled=true; b.textContent=file?t('uploading'):t('save');

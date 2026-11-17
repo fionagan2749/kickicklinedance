@@ -19,12 +19,13 @@
     video:'<rect x="2" y="5" width="15" height="14" rx="2"/><path d="m17 10 5-3v10l-5-3"/>',
     bag:'<path d="M6 7h12l1 14H5z"/><path d="M9 7a3 3 0 0 1 6 0"/>',
     gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',
+    music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
     globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>'
   };
   /* [id, icon, en, zh, href or null (= coming soon)] grouped by section */
   var MENU=[
     {en:'Overview',zh:'总览',items:[['dashboard','home','Dashboard','管理首页','admin.html'],['report','chart','Workshop report','活动报告','events.html']]},
-    {en:'Classes',zh:'课程',items:[['classes','cal','Classes & timetable','课程与课表','classes.html'],['teachers','teacher','Teachers','老师','./#teachers'],['venues','pin','Venues & areas','场地与地区',null]]},
+    {en:'Classes',zh:'课程',items:[['classes','cal','Classes & timetable','课程与课表','classes.html'],['teachers','teacher','Teachers','老师','./#teachers'],['music','music','Songs & videos','歌曲与教学视频','music.html'],['venues','pin','Venues & areas','场地与地区',null]]},
     {en:'Students',zh:'学生',items:[['students','users','Students','学生','students.html'],['checkin','qr','Check-in & attendance','签到与出席','event.html'],['packages','ticket','Packages & credits','配套与 Credit',null]]},
     {en:'Money',zh:'财务',items:[['payments','cash','Payments','付款记录',null],['pricing','tag','Pricing','收费方案',null]]},
     {en:'Community',zh:'活动与社群',items:[['events','star','Events & workshops','活动与体验日','event.html'],['announce','mega','Announcements','公告',null],['media','video','Videos & photos','影片与照片',null],['shop','bag','Shop','商店','products.html']]},
