@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Our History · KickickLineDance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: phone-width column; sticky year chips, one glass card per event with a photo grid; tap = full-screen viewer. */
+:root{
+  --ink:#1E1B4B; --muted:#6B6688; --bg:#FCF3EE;
+  --rim:linear-gradient(135deg,#FFB3D6 0%,#fff 20%,#9FE6FF 40%,#fff 58%,#C9B2FF 76%,#FFC9A3 92%);
+  --cta:linear-gradient(90deg,#FF8A3D 0%,#FF4F8B 50%,#A63CF0 100%);
+  --hot:#E8475B;
+  --font:"Plus Jakarta Sans","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;
+  background:
+    radial-gradient(360px 360px at 0% 0%,rgba(255,205,215,.55),transparent 70%),
+    radial-gradient(360px 360px at 100% 30%,rgba(201,178,255,.45),transparent 70%),
+    radial-gradient(360px 360px at 0% 75%,rgba(255,201,163,.45),transparent 70%),
+    linear-gradient(#FCF3EE,#F6EEF8);
+  background-attachment:fixed;min-height:100vh}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid #A63CF0;outline-offset:2px}
+.app{max-width:480px;margin:0 auto;padding:0 16px calc(110px + env(safe-area-inset-bottom,0px))}
+.glass,.glass-pill{border:1.3px solid transparent;
+  background:linear-gradient(165deg,rgba(255,255,255,.82),rgba(255,255,255,.5)) padding-box, var(--rim) border-box;
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);
+  box-shadow:inset 0 1.5px 0 0 rgba(255,255,255,.95), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 -10px 18px -14px rgba(139,92,246,.25), 0 8px 24px 0 rgba(139,92,246,.13), -8px 12px 24px -18px rgba(236,72,153,.35), 10px -4px 22px -18px rgba(6,182,212,.35)}
+.glass{border-radius:22px}
+.glass-pill{border-radius:999px}
+.cta{border:0;background:var(--cta);color:#fff;font-weight:700;border-radius:999px;padding:10px 18px;box-shadow:0 8px 18px -8px rgba(255,79,139,.6);text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+
+header{position:sticky;top:0;z-index:20;padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;display:flex;align-items:center;gap:10px}
+header::before{content:"";position:absolute;inset:0 -16px;z-index:-1;background:linear-gradient(rgba(252,243,238,.88),rgba(252,243,238,.6));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.back{width:44px;height:44px;display:grid;place-items:center;text-decoration:none;flex-shrink:0}
+.brand{font-weight:800;font-size:clamp(14px,4.1vw,18px);letter-spacing:-.4px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lang{display:flex;padding:3px;gap:2px}
+.lang button{border:0;background:transparent;font-weight:700;font-size:13px;padding:7px 9px;border-radius:999px}
+.lang button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+.title{font-size:24px;font-weight:800;margin:4px 0 12px}
+.chips button{border:1.3px solid transparent;font-weight:700;font-size:14px;padding:8px 13px}
+.chips button[aria-pressed="true"]{background:var(--cta) padding-box,var(--cta) border-box;color:#fff;box-shadow:0 6px 14px -8px rgba(255,79,139,.7)}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0;text-align:center}
+nav.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(448px,calc(100% - 24px));display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:6px 6px 8px;z-index:30}
+nav.tabbar a,nav.tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted);text-decoration:none;padding:6px 0;border-radius:18px}
+nav.tabbar .on{color:#2563EB;background:linear-gradient(180deg,rgba(191,219,254,.7),rgba(255,255,255,.4))}
+nav.tabbar svg{width:24px;height:24px}
+nav.tabbar .qr{margin-top:-30px}
+nav.tabbar .qr .orb{width:62px;height:62px;border-radius:50%;background:var(--cta);display:grid;place-items:center;color:#fff;box-shadow:0 10px 24px -8px rgba(255,79,139,.7), inset 0 2px 0 rgba(255,255,255,.5);border:3px solid rgba(255,255,255,.8)}
+nav.tabbar .qr span{color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:40}
+
+
+.lead{margin:-6px 0 12px;color:var(--muted);font-size:14px}
+.years{position:sticky;top:64px;z-index:15;display:flex;gap:7px;overflow-x:auto;padding:4px 2px 12px;scrollbar-width:none;margin:0 -16px;padding-left:16px;padding-right:16px}
+.years::-webkit-scrollbar{display:none}
+.years a{flex:0 0 auto;text-decoration:none;font-weight:800;font-size:14px;padding:8px 14px}
+.years a.on{background:var(--cta) padding-box,var(--cta) border-box;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px}
+.stats div{padding:10px 6px;text-align:center}
+.stats b{display:block;font-size:22px;font-weight:800;line-height:1.1;background:var(--cta);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stats span{font-size:12px;color:var(--muted);font-weight:700}
+.ev{padding:14px 12px 12px;margin:0 0 14px;scroll-margin-top:118px}
+.ev h2{margin:0 0 2px;display:flex;align-items:center;gap:8px;font-size:17px;line-height:1.25}
+.ev .yr{flex:0 0 auto;font-size:12.5px;font-weight:800;color:#fff;background:var(--cta);border-radius:999px;padding:3px 10px}
+.ev .ct{font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 10px}
+.ph{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.ph button{border:0;padding:0;background:#eee;border-radius:10px;overflow:hidden;aspect-ratio:1/1}
+.ph button:first-child{grid-column:span 2;grid-row:span 2}
+.ph img{display:block;width:100%;height:100%;object-fit:cover}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0;text-align:center}
+.note a{color:#A63CF0;font-weight:700}
+.lb{position:fixed;inset:0;z-index:60;background:rgba(14,12,36,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:pan-y}
+.lb img{max-width:100%;max-height:calc(100vh - 140px);object-fit:contain;user-select:none}
+.lb .cap{color:#fff;font-weight:700;font-size:14px;margin:12px 16px 0;text-align:center}
+.lb .x,.lb .pv,.lb .nx{position:absolute;border:0;background:rgba(255,255,255,.16);color:#fff;width:46px;height:46px;border-radius:50%;font-size:22px;display:grid;place-items:center}
+.lb .x{top:calc(14px + env(safe-area-inset-top,0px));right:14px}
+.lb .pv{left:10px;top:50%}.lb .nx{right:10px;top:50%}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <a class="back glass-pill" href="./" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></a>
+    <div class="brand">KickickLineDance</div>
+    <div class="lang glass-pill" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+    </div>
+  </header>
+  <h1 class="title" data-t="title"></h1>
+  <p class="lead" data-t="lead"></p>
+  <div class="stats" id="stats"></div>
+  <nav class="years" id="years" aria-label="Years"></nav>
+  <div id="list"></div>
+  <p class="note" id="note"></p>
+</div>
+<nav class="tabbar glass" aria-label="Main">
+  <a href="./"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span data-t="navHome"></span></a>
+  <a href="classes.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span data-t="navClasses"></span></a>
+  <button type="button" class="qr" data-soon><span class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="13" width="4" height="4"/><path d="M13 7h4v4M7 13v4h4"/></svg></span><span data-t="navQR"></span></button>
+  <a href="products.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.4a2 2 0 0 0 2-1.6L22 7H6"/></svg><span data-t="navCart"></span></a>
+  <button type="button" data-soon><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span data-t="navMe"></span></button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<div class="toast" id="toast" hidden></div>
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true">
+  <button type="button" class="x" id="lbx" aria-label="Close">✕</button>
+  <button type="button" class="pv" id="lbp" aria-label="Previous">‹</button>
+  <img id="lbi" alt="">
+  <div class="cap" id="lbc"></div>
+  <button type="button" class="nx" id="lbn" aria-label="Next">›</button>
+</div>
+<script>
+(function(){
+  var T={
+    en:{title:'Our History',lead:'Over 20 years of dancing together. Photos from our anniversary parties, trips and gatherings.',
+      years:'years',events:'events',photos:'photos',n:'photos',
+      note:'More photos on our <a href="https://www.facebook.com/Kickick.LineDance.Malaysia/photos_albums" target="_blank" rel="noopener">Facebook page</a>.',
+      navHome:'Home',navClasses:'Classes',navQR:'My QR',navCart:'Cart',navMe:'Me',soon:'Coming soon'},
+    zh:{title:'我们的足迹',lead:'一起跳舞超过 20 年。周年庆、旅行和聚会的照片。',
+      years:'年',events:'场活动',photos:'张照片',n:'张照片',
+      note:'更多照片在我们的 <a href="https://www.facebook.com/Kickick.LineDance.Malaysia/photos_albums" target="_blank" rel="noopener">Facebook 专页</a>。',
+      navHome:'首页',navClasses:'课程',navQR:'我的 QR',navCart:'购物车',navMe:'我的',soon:'即将推出'}
+  };
+  /* Photos are copies from the Kickick Line Dance Facebook albums (8 per album, forms and food shots left out). */
+  var E=[{"y":"2005","en":"1st Anniversary","zh":"一周年庆","p":[["h-2005-01.jpg",1.33],["h-2005-02.jpg",1.33],["h-2005-03.jpg",1.33],["h-2005-04.jpg",1.33],["h-2005-05.jpg",1.33],["h-2005-06.jpg",0.75],["h-2005-07.jpg",0.75],["h-2005-08.jpg",1.33]]},{"y":"2006","en":"2nd Anniversary · Line Dance & Dinner Party","zh":"二周年 · 排舞晚宴","p":[["h-2006-01.jpg",1.33],["h-2006-02.jpg",1.33],["h-2006-03.jpg",1.33],["h-2006-04.jpg",1.33],["h-2006-05.jpg",1.33],["h-2006-06.jpg",1.33],["h-2006-07.jpg",1.33],["h-2006-08.jpg",1.33]]},{"y":"2007","en":"3rd Anniversary · Glitz & Glitters","zh":"三周年 · Glitz & Glitters","p":[["h-2007-01.jpg",1.33],["h-2007-02.jpg",0.75],["h-2007-03.jpg",1.33],["h-2007-04.jpg",1.33],["h-2007-05.jpg",1.33],["h-2007-06.jpg",1.33],["h-2007-07.jpg",1.33],["h-2007-08.jpg",1.33]]},{"y":"2009","en":"5th Anniversary · Dinner, Competition & Line Dance Party","zh":"五周年 · 晚宴、比赛与排舞派对","p":[["h-2009-01.jpg",1.5],["h-2009-02.jpg",1.5],["h-2009-03.jpg",1.5],["h-2009-04.jpg",0.67],["h-2009-05.jpg",0.67],["h-2009-06.jpg",0.67],["h-2009-07.jpg",0.67],["h-2009-08.jpg",0.67]]},{"y":"2010","en":"6th Anniversary Celebration","zh":"六周年庆","p":[["h-2010-01.jpg",1.5],["h-2010-02.jpg",1.5],["h-2010-04.jpg",0.67],["h-2010-05.jpg",1.5],["h-2010-06.jpg",1.5],["h-2010-07.jpg",1.5],["h-2010-08.jpg",1.5]]},{"y":"2011","en":"7th Anniversary · Glitz & Glitters Nite","zh":"七周年 · Glitz & Glitters 之夜","p":[["h-2011-01.jpg",1.33],["h-2011-02.jpg",1.33],["h-2011-03.jpg",1.33],["h-2011-04.jpg",1.33],["h-2011-05.jpg",1.33],["h-2011-06.jpg",1.33],["h-2011-07.jpg",1.5],["h-2011-08.jpg",1.51]]},{"y":"2012","en":"8th Anniversary","zh":"八周年庆","p":[["h-2012-01.jpg",1.5],["h-2012-02.jpg",1.33],["h-2012-03.jpg",1.5],["h-2012-04.jpg",1.33],["h-2012-05.jpg",1.5],["h-2012-06.jpg",1.78],["h-2012-07.jpg",1.5],["h-2012-08.jpg",1.33]]},{"y":"2013","en":"9th Anniversary · Glitz & Glitters Nite","zh":"九周年 · Glitz & Glitters 之夜","p":[["h-2013-01.jpg",2.13],["h-2013-02.jpg",1.8],["h-2013-03.jpg",1.67],["h-2013-04.jpg",1.73],["h-2013-05.jpg",1.78],["h-2013-06.jpg",2.56],["h-2013-07.jpg",2.0],["h-2013-08.jpg",1.95]]},{"y":"2014","en":"Pre-10th Anniversary Line Dance Party","zh":"十周年前夕排舞派对","p":[["h-2014p-01.jpg",1.78],["h-2014p-03.jpg",0.56],["h-2014p-04.jpg",1.33],["h-2014p-05.jpg",0.56],["h-2014p-06.jpg",1.78],["h-2014p-07.jpg",0.56],["h-2014p-08.jpg",0.56]]},{"y":"2014","en":"10th Anniversary Celebration","zh":"十周年庆","p":[["h-2014-01.jpg",1.7],["h-2014-02.jpg",1.78],["h-2014-03.jpg",1.5],["h-2014-04.jpg",1.5],["h-2014-05.jpg",1.5],["h-2014-06.jpg",1.5],["h-2014-07.jpg",1.5],["h-2014-08.jpg",1.5]]},{"y":"2015","en":"11th Anniversary Celebration","zh":"十一周年庆","p":[["h-2015-01.jpg",1.65],["h-2015-07.jpg",0.7],["h-2015-08.jpg",1.78]]},{"y":"2022","en":"Cameron Highlands Trip","zh":"金马仑高原之旅","p":[["h-2022c-02.jpg",1.36],["h-2022c-03.jpg",0.79],["h-2022c-04.jpg",0.75],["h-2022c-05.jpg",0.67],["h-2022c-06.jpg",0.77],["h-2022c-07.jpg",1.33],["h-2022c-08.jpg",1.5]]},{"y":"2022","en":"Christmas Count Down Party","zh":"圣诞倒数派对","p":[["h-party-03.jpg",1.81],["h-party-05.jpg",2.57],["h-party-06.jpg",0.75],["h-party-07.jpg",2.32],["h-party-08.jpg",1.7]]},{"y":"2024","en":"Kickick gathering","zh":"Kickick 聚会","p":[["h-2024-01.jpg",1.99],["h-2024-02.jpg",0.53]]}];
+  var st={lang:'en'}; try{ if(localStorage.getItem('kld_lang')==='zh') st.lang='zh'; }catch(e){}
+  function el(t,c,x){ var e=document.createElement(t); if(c) e.className=c; if(x!=null) e.textContent=x; return e; }
+  var flat=[]; E.forEach(function(ev,i){ ev.p.forEach(function(p){ flat.push({i:i,src:p[0]}); }); });
+  function render(){
+    var t=T[st.lang]; document.documentElement.lang=st.lang==='zh'?'zh':'en';
+    document.querySelectorAll('[data-t]').forEach(function(n){ var k=n.getAttribute('data-t'); if(t[k]!=null) n.textContent=t[k]; });
+    document.querySelectorAll('[data-lang]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.lang===st.lang); });
+    document.getElementById('note').innerHTML=t.note;
+    var s=document.getElementById('stats'); s.innerHTML='';
+    [[new Date().getFullYear()-2004+'+',t.years],[E.length,t.events],[flat.length,t.photos]].forEach(function(x){ var d=el('div','glass'); d.appendChild(el('b','',x[0])); d.appendChild(el('span','',x[1])); s.appendChild(d); });
+    var y=document.getElementById('years'); y.innerHTML=''; var seen={};
+    E.forEach(function(ev,i){ if(seen[ev.y]) return; seen[ev.y]=1; var a=el('a','glass-pill',ev.y); a.href='#ev'+i; y.appendChild(a); });
+    var L=document.getElementById('list'); L.innerHTML=''; var k=0;
+    E.forEach(function(ev,i){
+      var c=el('section','ev glass'); c.id='ev'+i;
+      var h=el('h2'); h.appendChild(el('span','yr',ev.y)); h.appendChild(el('span','',ev[st.lang])); c.appendChild(h);
+      c.appendChild(el('p','ct',ev.p.length+' '+t.n));
+      var g=el('div','ph');
+      ev.p.forEach(function(p){ var b=el('button'); b.type='button'; var im=el('img'); im.src=p[0]; im.loading='lazy'; im.alt=ev.y+' '+ev[st.lang]; b.appendChild(im); (function(n){ b.addEventListener('click',function(){ open(n); }); })(k++); g.appendChild(b); });
+      c.appendChild(g); L.appendChild(c);
+    });
+    try{ localStorage.setItem('kld_lang',st.lang); }catch(e){}
+  }
+  var cur=0, lb=document.getElementById('lb');
+  function show(){ var f=flat[cur], ev=E[f.i]; document.getElementById('lbi').src=f.src; document.getElementById('lbc').textContent=ev.y+' · '+ev[st.lang]+'  ('+(cur+1)+'/'+flat.length+')'; }
+  function open(n){ cur=n; show(); lb.hidden=false; document.body.style.overflow='hidden'; }
+  function close(){ lb.hidden=true; document.body.style.overflow=''; }
+  function step(d){ cur=(cur+d+flat.length)%flat.length; show(); }
+  document.getElementById('lbx').onclick=close;
+  document.getElementById('lbp').onclick=function(e){ e.stopPropagation(); step(-1); };
+  document.getElementById('lbn').onclick=function(e){ e.stopPropagation(); step(1); };
+  lb.addEventListener('click',function(e){ if(e.target===lb) close(); });
+  document.addEventListener('keydown',function(e){ if(lb.hidden) return; if(e.key==='Escape') close(); if(e.key==='ArrowLeft') step(-1); if(e.key==='ArrowRight') step(1); });
+  var sx=null; lb.addEventListener('touchstart',function(e){ sx=e.touches[0].clientX; },{passive:true});
+  lb.addEventListener('touchend',function(e){ if(sx==null) return; var dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>40) step(dx<0?1:-1); sx=null; });
+  /* highlight the year chip of the section in view */
+  var chips=function(){ return document.querySelectorAll('#years a'); };
+  window.addEventListener('scroll',function(){ var best=null; document.querySelectorAll('.ev').forEach(function(s){ if(s.getBoundingClientRect().top<170) best=s; }); var yr=best?E[+best.id.slice(2)].y:null; chips().forEach(function(a){ a.classList.toggle('on',a.textContent===yr); }); },{passive:true});
+  var tt; function soon(e){ if(e) e.preventDefault(); var x=document.getElementById('toast'); x.textContent=T[st.lang].soon; x.hidden=false; clearTimeout(tt); tt=setTimeout(function(){x.hidden=true;},1600); }
+  document.querySelectorAll('[data-soon]').forEach(function(b){ b.addEventListener('click',soon); });
+  document.querySelectorAll('[data-lang]').forEach(function(b){ b.addEventListener('click',function(){ st.lang=b.dataset.lang; render(); }); });
+  render();
+})();
+</script>
+</body>
+</html>
